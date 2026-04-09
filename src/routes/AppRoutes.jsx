@@ -31,7 +31,7 @@ export const AppRoutes = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Navigate to="/menu" replace />} />
+        <Route path="/" element={<Navigate to="/admin" replace />} />
 
         <Route
           path="/menu"
