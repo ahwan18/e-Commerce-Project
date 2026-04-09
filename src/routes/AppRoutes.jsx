@@ -18,6 +18,7 @@ import { ProductDetail } from '../views/customer/ProductDetail';
 import { Cart } from '../views/customer/Cart';
 import { Checkout } from '../views/customer/Checkout';
 import { OrderTracking } from '../views/customer/OrderTracking';
+import { OrderStatus } from '../views/customer/OrderStatus';
 
 import { Login } from '../views/admin/Login';
 import { Dashboard } from '../views/admin/Dashboard';
@@ -96,6 +97,14 @@ export const AppRoutes = () => {
                 <Navbar />
                 <OrderTracking />
               </>
+            </CounterGate>
+          }
+        />
+        <Route
+          path="/order-status"
+          element={
+            <CounterGate>
+              <OrderStatus />
             </CounterGate>
           }
         />

@@ -11,7 +11,7 @@ import * as ProductController from '../../controllers/productController';
 export const Catalog = () => {
   const navigate = useNavigate();
   const { addItem, cartCount, cartTotal } = useCart();
-  const { counterName } = useCounter();
+  const { counterName, mode } = useCounter();
 
   const [allProducts, setAllProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -130,10 +130,12 @@ export const Catalog = () => {
   };
 
   const handleAddToCart = (product) => {
-    const success = addItem(product, 1);
-    if (success) {
-      showNotification(`${product.name} ditambahkan ke keranjang!`);
+    if (mode === 'browsing') {
+      setNotification('Scan QR untuk mulai memesan.');
+      return;
     }
+    addItem(product, 1);
+    setNotification('Ditambahkan ke keranjang!');
   };
 
   const handleViewDetails = (productId) => {
@@ -157,17 +159,18 @@ export const Catalog = () => {
 
   return (
     <main className="page-shell">
-      {notification && (
-        <div
-          className="fixed top-20 right-4 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-md z-50 transition-opacity duration-200"
-          role="status"
-          aria-live="polite"
-        >
-          {notification}
-        </div>
-      )}
-
       <div className="page-container pb-28">
+        {mode === 'browsing' && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl text-center font-medium">
+            Preview Mode – Scan QR untuk mulai memesan
+          </div>
+        )}
+        {notification && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-xl text-center font-medium">
+            {notification}
+          </div>
+        )}
+
         <header className="mb-6">
           <h1 className="text-3xl sm:text-4xl font-semibold text-slate-900 mb-2">Katalog Mainan</h1>
           <p className="text-slate-600">Pilih mainan favorit dan tambahkan ke keranjang.</p>
@@ -391,6 +394,7 @@ export const Catalog = () => {
                     product={product}
                     onAddToCart={handleAddToCart}
                     onViewDetails={() => handleViewDetails(product.id)}
+                    disableAddToCart={mode === 'browsing'}
                   />
                 ))}
               </div>
@@ -399,7 +403,7 @@ export const Catalog = () => {
         </section>
       </div>
 
-      {cartCount > 0 && (
+      {cartCount > 0 && mode === 'ordering' && (
         <div className="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-slate-200 backdrop-blur z-40">
           <div className="container mx-auto px-4 py-3">
             <Button

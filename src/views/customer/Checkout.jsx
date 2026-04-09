@@ -19,7 +19,7 @@ import * as OrderController from '../../controllers/orderController';
 export const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, clearCart } = useCart();
-  const { counterId, sessionId, counterName, releaseSession } = useCounter();
+  const { counterId, sessionId, counterName, releaseSession, mode } = useCounter();
 
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -124,6 +124,18 @@ export const Checkout = () => {
               Kembali ke Katalog
             </Button>
           </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (mode === 'browsing') {
+    return (
+      <main className="page-shell flex flex-col items-center justify-center min-h-screen">
+        <div className="max-w-md w-full p-6 rounded-lg shadow-lg bg-yellow-50 text-yellow-800 text-center">
+          <h2 className="text-2xl font-bold mb-2">Preview Mode</h2>
+          <p className="mb-4">Scan QR di meja untuk mulai checkout dan memesan.</p>
+          <Button onClick={() => navigate('/menu')} variant="primary">Kembali ke Katalog</Button>
         </div>
       </main>
     );
