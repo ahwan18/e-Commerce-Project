@@ -37,12 +37,10 @@ export const AppRoutes = () => {
         <Route
           path="/menu"
           element={
-            <CounterGate>
-              <>
-                <Navbar />
-                <Catalog />
-              </>
-            </CounterGate>
+            <>
+              <Navbar />
+              <Catalog />
+            </>
           }
         />
         <Route
