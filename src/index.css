@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+  color: #111827;
+  background: #f8fafc;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc;
+  color: #111827;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  :focus-visible {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+  }
+}
+
+@layer components {
+  .surface-card {
+    @apply bg-white rounded-2xl shadow-sm border border-slate-200;
+  }
+
+  .page-shell {
+    @apply min-h-screen bg-slate-50;
+  }
+
+  .page-container {
+    @apply container mx-auto px-4 py-6 sm:py-8;
+  }
+}
