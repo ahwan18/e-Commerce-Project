@@ -77,9 +77,9 @@ export const Checkout = () => {
         await releaseSession();
         setSuccess(true);
         clearCart();
-        setTimeout(() => {
-          navigate(`/menu?counter_id=${counterId}`);
-        }, 3000);
+        // Redirect to order status page with order_id and status
+        navigate(`/order-status?order_id=${result.order_id}&status=paid`);
+        return;
       } else if (!result.payment.pending) {
         await releaseSession();
         setError(result.payment.message || 'Pembayaran gagal');

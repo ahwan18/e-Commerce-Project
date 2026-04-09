@@ -70,9 +70,10 @@ export const CounterProvider = ({ children }) => {
         const persisted = localStorage.getItem(ACTIVE_COUNTER_KEY);
         const persistedSession = persisted ? JSON.parse(persisted) : null;
 
-        const counterId = counterIdFromUrl || persistedSession?.counterId;
+        // Only acquire session if counter_id is present in URL
+        const counterId = counterIdFromUrl;
         if (!counterId) {
-          // Browsing mode: no counter, no session
+          // Browsing mode: no counter, no session, no lock
           if (mounted) {
             setCounter(null);
             setSessionId(null);
