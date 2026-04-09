@@ -70,18 +70,9 @@ export const CounterProvider = ({ children }) => {
         const persisted = localStorage.getItem(ACTIVE_COUNTER_KEY);
         const persistedSession = persisted ? JSON.parse(persisted) : null;
 
-        // Only acquire session if counter_id is present in URL
-        const counterId = counterIdFromUrl;
+        const counterId = counterIdFromUrl || persistedSession?.counterId;
         if (!counterId) {
-          // Browsing mode: no counter, no session, no lock
-          if (mounted) {
-            setCounter(null);
-            setSessionId(null);
-            clearPersistedSession();
-            setError(null);
-            setLoading(false);
-          }
-          return;
+          throw new Error('Akses menu hanya melalui QR counter');
         }
 
         const nextSessionId = persistedSession?.sessionId || createSessionId();
@@ -168,12 +159,6 @@ export const CounterProvider = ({ children }) => {
     };
   }, [counter?.id, isAdminRoute, sessionId]);
 
-  const mode = useMemo(() => {
-    if (isAdminRoute) return null;
-    if (counter && sessionId) return 'ordering';
-    return 'browsing';
-  }, [counter, sessionId, isAdminRoute]);
-
   const value = useMemo(
     () => ({
       counter,
@@ -184,9 +169,8 @@ export const CounterProvider = ({ children }) => {
       error,
       hasActiveCounterSession: Boolean(counter?.id && sessionId),
       releaseSession,
-      mode, // 'ordering' or 'browsing'
     }),
-    [counter, error, loading, sessionId, mode]
+    [counter, error, loading, sessionId]
   );
 
   return <CounterContext.Provider value={value}>{children}</CounterContext.Provider>;

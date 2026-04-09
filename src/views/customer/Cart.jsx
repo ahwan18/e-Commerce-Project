@@ -17,7 +17,7 @@ import { useCounter } from '../../context/CounterContext';
 export const Cart = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, updateQuantity, removeItem } = useCart();
-  const { counterName, mode } = useCounter();
+  const { counterName } = useCounter();
 
   const handleUpdateQuantity = (productId, newQuantity) => {
     updateQuantity(productId, newQuantity);
@@ -30,18 +30,6 @@ export const Cart = () => {
   const handleCheckout = () => {
     navigate('/shop/checkout');
   };
-
-  if (mode === 'browsing') {
-    return (
-      <main className="page-shell flex flex-col items-center justify-center min-h-screen">
-        <div className="max-w-md w-full p-6 rounded-lg shadow-lg bg-yellow-50 text-yellow-800 text-center">
-          <h2 className="text-2xl font-bold mb-2">Preview Mode</h2>
-          <p className="mb-4">Scan QR di meja untuk mulai memesan dan menggunakan keranjang.</p>
-          <Button onClick={() => navigate('/menu')} variant="primary">Kembali ke Katalog</Button>
-        </div>
-      </main>
-    );
-  }
 
   if (cart.length === 0) {
     return (

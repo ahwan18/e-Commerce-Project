@@ -16,13 +16,11 @@ import { QRCodeDisplay } from '../../components/QRCodeDisplay';
 import { useCart } from '../../context/CartContext';
 import { formatPrice } from '../../utils/helpers';
 import * as ProductController from '../../controllers/productController';
-import { useCounter } from '../../context/CounterContext';
 
 export const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const { mode } = useCounter();
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -47,10 +45,6 @@ export const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
-    if (mode === 'browsing') {
-      alert('Scan QR untuk mulai memesan.');
-      return;
-    }
     const success = addItem(product, quantity);
     if (success) {
       navigate('/shop/cart');

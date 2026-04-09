@@ -11,7 +11,7 @@ import { ShoppingCart } from 'lucide-react';
 import { formatPrice } from '../utils/helpers';
 import { Button } from './Button';
 
-export const ProductCard = ({ product, onAddToCart, onViewDetails, disableAddToCart }) => {
+export const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
   const isOutOfStock = product.stock === 0;
 
   return (
@@ -63,18 +63,16 @@ export const ProductCard = ({ product, onAddToCart, onViewDetails, disableAddToC
         <Button
           onClick={(e) => {
             e.stopPropagation();
-            if (!disableAddToCart && !isOutOfStock) {
-              onAddToCart(product);
-            }
+            onAddToCart(product);
           }}
           aria-label={`Tambah ${product.name} ke keranjang`}
-          disabled={isOutOfStock || disableAddToCart}
+          disabled={isOutOfStock}
           variant="primary"
           size="sm"
           className="w-full flex items-center justify-center gap-2"
         >
           <ShoppingCart size={16} />
-          <span>{isOutOfStock ? 'Habis' : disableAddToCart ? 'Tambah (Nonaktif)' : 'Tambah'}</span>
+          <span>{isOutOfStock ? 'Habis' : 'Tambah'}</span>
         </Button>
       </div>
     </article>
