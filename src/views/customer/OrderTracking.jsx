@@ -59,16 +59,17 @@ export const OrderTracking = () => {
     try {
       setCompleting(true);
       await OrderController.updateStatus(order.id, 'completed');
-      
+
       // Release session after completing order
       await releaseSession();
-      
+
       // Reload order to show updated status
       await loadOrder(order.id);
-      
-      // Redirect to shop after a short delay
+
+      // Redirect to counter shop page after a short delay
+      const counterId = order.counter_id;
       setTimeout(() => {
-        navigate('/shop');
+        navigate(`/menu?counter_id=${counterId}`);
       }, 2000);
     } catch (err) {
       setError('Gagal menyelesaikan pesanan: ' + err.message);

@@ -78,9 +78,6 @@ export const Checkout = () => {
         setOrderId(result.order.id);
         setSuccess(true);
         clearCart();
-        setTimeout(() => {
-          navigate(`/track/${result.order.id}`);
-        }, 2000);
       } else if (!result.payment.pending) {
         await releaseSession();
         setError(result.payment.message || 'Pembayaran gagal');
@@ -121,9 +118,6 @@ export const Checkout = () => {
                 ID Pesanan: <span className="font-bold text-blue-600">{orderId.substring(0, 8).toUpperCase()}</span>
               </p>
             )}
-            <p className="text-gray-500 text-sm mb-8">
-              Mengalihkan ke halaman tracking pesanan...
-            </p>
             <Button
               onClick={() => navigate(`/track/${orderId}`)}
               variant="primary"
