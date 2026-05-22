@@ -66,11 +66,7 @@ export const OrderTracking = () => {
       // Reload order to show updated status
       await loadOrder(order.id);
 
-      // Redirect to counter shop page after a short delay
-      const counterId = order.counter_id;
-      setTimeout(() => {
-        navigate(`/menu?counter_id=${counterId}`);
-      }, 2000);
+      // Stay on tracking page - no redirect to catalog
     } catch (err) {
       setError('Gagal menyelesaikan pesanan: ' + err.message);
     } finally {
@@ -176,8 +172,22 @@ export const OrderTracking = () => {
                       {completing ? 'Menyelesaikan...' : 'Selesaikan Pesanan'}
                     </Button>
                     <p className="text-sm text-gray-500 mt-2 text-center">
-                      Klik untuk menyelesaikan pesanan dan keluar dari sesi
+                      Klik untuk menyelesaikan pesanan
                     </p>
+                  </div>
+                )}
+
+                {order.status === 'completed' && (
+                  <div className="mt-6 pt-6 border-t">
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                      <CheckCircle size={48} className="mx-auto text-green-600 mb-3" />
+                      <p className="text-green-800 font-semibold text-lg">
+                        Pesanan Selesai!
+                      </p>
+                      <p className="text-green-700 text-sm mt-1">
+                        Pesanan Anda telah selesai dan siap diambil
+                      </p>
+                    </div>
                   </div>
                 )}
 
