@@ -119,7 +119,7 @@ export const Checkout = () => {
               </p>
             )}
             <Button
-              onClick={() => navigate(`/track/${orderId}`)}
+              onClick={() => navigate(`/shop/track/${orderId}`)}
               variant="primary"
               size="lg"
               aria-label="Lacak pesanan"
