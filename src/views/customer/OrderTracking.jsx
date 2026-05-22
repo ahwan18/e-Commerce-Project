@@ -15,15 +15,19 @@ import { Button } from '../../components/Button';
 import { Loading } from '../../components/Loading';
 import { formatPrice } from '../../utils/helpers';
 import * as TrackingController from '../../controllers/trackingController';
+import * as OrderController from '../../controllers/orderController';
+import { useCounter } from '../../context/CounterContext';
 
 export const OrderTracking = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const { releaseSession } = useCounter();
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(!!orderId);
   const [error, setError] = useState(null);
   const [searchId, setSearchId] = useState(orderId || '');
+  const [completing, setCompleting] = useState(false);
 
   const loadOrder = async (id) => {
     if (!id.trim()) {
@@ -47,6 +51,30 @@ export const OrderTracking = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     loadOrder(searchId);
+  };
+
+  const handleCompleteOrder = async () => {
+    if (!order) return;
+
+    try {
+      setCompleting(true);
+      await OrderController.updateStatus(order.id, 'completed');
+      
+      // Release session after completing order
+      await releaseSession();
+      
+      // Reload order to show updated status
+      await loadOrder(order.id);
+      
+      // Redirect to shop after a short delay
+      setTimeout(() => {
+        navigate('/shop');
+      }, 2000);
+    } catch (err) {
+      setError('Gagal menyelesaikan pesanan: ' + err.message);
+    } finally {
+      setCompleting(false);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -162,6 +190,23 @@ export const OrderTracking = () => {
                   {order.status === 'completed' && 'Pesanan Anda telah selesai dan siap diambil'}
                   {order.status === 'cancelled' && 'Pesanan Anda telah dibatalkan'}
                 </p>
+
+                {order.status === 'paid' && (
+                  <div className="mt-6 pt-6 border-t">
+                    <Button
+                      onClick={handleCompleteOrder}
+                      variant="success"
+                      size="lg"
+                      className="w-full"
+                      disabled={completing}
+                    >
+                      {completing ? 'Menyelesaikan...' : 'Selesaikan Pesanan'}
+                    </Button>
+                    <p className="text-sm text-gray-500 mt-2 text-center">
+                      Klik untuk menyelesaikan pesanan dan keluar dari sesi
+                    </p>
+                  </div>
+                )}
 
                 <div className="grid md:grid-cols-2 gap-6 pt-6 border-t">
                   <div>

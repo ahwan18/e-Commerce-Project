@@ -28,6 +28,7 @@ export const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [orderId, setOrderId] = useState(null);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -74,12 +75,12 @@ export const Checkout = () => {
       const result = await OrderController.createOrder(orderData);
 
       if (result.payment.success) {
-        await releaseSession();
+        setOrderId(result.order.id);
         setSuccess(true);
         clearCart();
         setTimeout(() => {
-          navigate(`/menu?counter_id=${counterId}`);
-        }, 3000);
+          navigate(`/track/${result.order.id}`);
+        }, 2000);
       } else if (!result.payment.pending) {
         await releaseSession();
         setError(result.payment.message || 'Pembayaran gagal');
@@ -110,18 +111,26 @@ export const Checkout = () => {
           <div className="max-w-2xl mx-auto text-center py-16">
             <CheckCircle size={100} className="mx-auto text-green-500 mb-6" />
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              Pesanan Berhasil!
+              Pembayaran Berhasil!
             </h1>
-            <p className="text-gray-600 text-lg mb-8">
+            <p className="text-gray-600 text-lg mb-4">
               Terima kasih. Pesananmu sedang kami proses.
             </p>
+            {orderId && (
+              <p className="text-gray-600 text-lg mb-8">
+                ID Pesanan: <span className="font-bold text-blue-600">{orderId.substring(0, 8).toUpperCase()}</span>
+              </p>
+            )}
+            <p className="text-gray-500 text-sm mb-8">
+              Mengalihkan ke halaman tracking pesanan...
+            </p>
             <Button
-              onClick={() => navigate(`/menu?counter_id=${counterId}`)}
+              onClick={() => navigate(`/track/${orderId}`)}
               variant="primary"
               size="lg"
-              aria-label="Kembali ke katalog"
+              aria-label="Lacak pesanan"
             >
-              Kembali ke Katalog
+              Lacak Pesanan
             </Button>
           </div>
         </div>
