@@ -8,7 +8,7 @@
  * All logic is handled through controllers.
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Package, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/Button';
@@ -29,7 +29,7 @@ export const OrderTracking = () => {
   const [searchId, setSearchId] = useState(orderId || '');
   const [completing, setCompleting] = useState(false);
 
-  const loadOrder = async (id) => {
+  const loadOrder = useCallback(async (id) => {
     if (!id.trim()) {
       setError('Masukkan ID pesanan');
       return;
@@ -46,7 +46,13 @@ export const OrderTracking = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (orderId) {
+      loadOrder(orderId);
+    }
+  }, [orderId, loadOrder]);
 
   const handleSearch = (e) => {
     e.preventDefault();
