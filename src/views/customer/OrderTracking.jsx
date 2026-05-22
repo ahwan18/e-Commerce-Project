@@ -13,7 +13,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Package, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Loading } from '../../components/Loading';
-import { formatPrice } from '../../utils/helpers';
+import { formatPrice, getStatusColor } from '../../utils/helpers';
 import * as TrackingController from '../../controllers/trackingController';
 import * as OrderController from '../../controllers/orderController';
 import { useCounter } from '../../context/CounterContext';
@@ -78,30 +78,6 @@ export const OrderTracking = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      paid: 'bg-blue-100 text-blue-800 border-blue-300',
-      completed: 'bg-green-100 text-green-800 border-green-300',
-      cancelled: 'bg-red-100 text-red-800 border-red-300',
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800 border-gray-300';
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending':
-        return <Clock size={20} />;
-      case 'paid':
-        return <Package size={20} />;
-      case 'completed':
-        return <CheckCircle size={20} />;
-      case 'cancelled':
-        return <AlertCircle size={20} />;
-      default:
-        return null;
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -176,20 +152,16 @@ export const OrderTracking = () => {
                       })}
                     </p>
                   </div>
-                  <div className={`px-6 py-3 rounded-full border-2 font-bold flex items-center gap-2 ${getStatusColor(order.status)}`}>
-                    {getStatusIcon(order.status)}
-                    {order.status === 'pending' && 'Menunggu Pembayaran'}
-                    {order.status === 'paid' && 'Sedang Diproses'}
-                    {order.status === 'completed' && 'Selesai'}
-                    {order.status === 'cancelled' && 'Dibatalkan'}
+                  <div className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                    {order.status}
                   </div>
                 </div>
 
                 <p className="text-gray-600 mb-6">
-                  {order.status === 'pending' && 'Pesanan Anda sedang menunggu pembayaran'}
-                  {order.status === 'paid' && 'Pesanan Anda sedang diproses oleh tim kami'}
-                  {order.status === 'completed' && 'Pesanan Anda telah selesai dan siap diambil'}
-                  {order.status === 'cancelled' && 'Pesanan Anda telah dibatalkan'}
+                  {order.status === 'pending' && 'Order is pending payment'}
+                  {order.status === 'paid' && 'Order is being processed'}
+                  {order.status === 'completed' && 'Order completed and ready for pickup'}
+                  {order.status === 'cancelled' && 'Order has been cancelled'}
                 </p>
 
                 {order.status === 'paid' && (

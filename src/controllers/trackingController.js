@@ -117,10 +117,10 @@ const getEstimatedTime = (status, createdAt) => {
  */
 const getStatusLabel = (status) => {
   const labels = {
-    pending: 'Menunggu Pembayaran',
-    paid: 'Sedang Diproses',
-    completed: 'Selesai',
-    cancelled: 'Dibatalkan',
+    pending: 'Pending',
+    paid: 'Paid',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
   };
   return labels[status] || status;
 };
@@ -132,10 +132,10 @@ const getStatusLabel = (status) => {
  */
 export const getStatusDescription = (status) => {
   const descriptions = {
-    pending: 'Pesanan Anda sedang menunggu pembayaran',
-    paid: 'Pesanan Anda sedang diproses oleh tim kami',
-    completed: 'Pesanan Anda telah selesai dan siap diambil',
-    cancelled: 'Pesanan Anda telah dibatalkan',
+    pending: 'Order is pending payment',
+    paid: 'Order is being processed',
+    completed: 'Order completed and ready for pickup',
+    cancelled: 'Order has been cancelled',
   };
-  return descriptions[status] || 'Status tidak diketahui';
+  return descriptions[status] || 'Unknown status';
 };
