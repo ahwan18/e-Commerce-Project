@@ -32,25 +32,34 @@ export const OrderTracking = () => {
   const loadOrder = useCallback(async (id) => {
     if (!id.trim()) {
       setError('Masukkan ID pesanan');
+      setLoading(false);
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
+      console.log('[OrderTracking] Loading order:', id);
       const orderData = await TrackingController.getOrderTracking(id);
+      console.log('[OrderTracking] Order loaded:', orderData);
       setOrder(orderData);
     } catch (err) {
+      console.error('[OrderTracking] Error loading order:', err);
       setError(err.message);
       setOrder(null);
     } finally {
+      console.log('[OrderTracking] Loading finished, setting loading to false');
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    console.log('[OrderTracking] Component mounted with orderId:', orderId);
     if (orderId) {
       loadOrder(orderId);
+    } else {
+      console.log('[OrderTracking] No orderId provided, setting loading to false');
+      setLoading(false);
     }
   }, [orderId, loadOrder]);
 
@@ -60,20 +69,28 @@ export const OrderTracking = () => {
   };
 
   const handleCompleteOrder = async () => {
-    if (!order) return;
+    if (!order) {
+      setError('Pesanan tidak ditemukan');
+      return;
+    }
 
     try {
       setCompleting(true);
+      console.log('[OrderTracking] Completing order:', order.id);
       await OrderController.updateStatus(order.id, 'completed');
+      console.log('[OrderTracking] Order status updated to completed');
 
       // Release session after completing order
       await releaseSession();
+      console.log('[OrderTracking] Session released');
 
       // Reload order to show updated status
       await loadOrder(order.id);
+      console.log('[OrderTracking] Order reloaded');
 
       // Stay on tracking page - no redirect to catalog
     } catch (err) {
+      console.error('[OrderTracking] Error completing order:', err);
       setError('Gagal menyelesaikan pesanan: ' + err.message);
     } finally {
       setCompleting(false);
