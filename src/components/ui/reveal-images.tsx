@@ -8,16 +8,17 @@ interface ImageSource {
 interface ShowImageListItemProps {
   text: string;
   images: [ImageSource, ImageSource];
+  className?: string;
 }
 
-function RevealImageListItem({ text, images }: ShowImageListItemProps) {
-  const container = "absolute right-8 -top-1 z-40 h-20 w-16";
+function RevealImageListItem({ text, images, className }: ShowImageListItemProps) {
+  const container = "absolute right-8 -top-1 z-40 h-20 w-16 pointer-events-none";
   const effect =
     "relative duration-500 delay-100 shadow-none group-hover:shadow-xl scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-100 group-hover:w-full group-hover:h-full w-16 h-16 overflow-hidden transition-all rounded-md";
 
   return (
     <div className="group relative h-fit w-fit overflow-visible py-4 sm:py-8 cursor-pointer">
-      <h1 className="text-5xl sm:text-7xl font-black text-white transition-all duration-500 group-hover:opacity-40">
+      <h1 className={cn("text-5xl sm:text-7xl font-black text-white transition-all duration-500 group-hover:opacity-40", className)}>
         {text}
       </h1>
       <div className={container}>
@@ -91,4 +92,4 @@ function RevealImageList() {
   );
 }
 
-export { RevealImageList };
+export { RevealImageList, RevealImageListItem };
