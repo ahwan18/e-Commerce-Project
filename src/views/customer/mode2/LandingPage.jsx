@@ -34,11 +34,7 @@ export const LandingPage = () => {
   }, []);
 
   useGSAP(() => {
-    // Hero Animations
-    gsap.from('.hero-badge', { y: -20, opacity: 0, duration: 0.8, ease: 'back.out(1.7)' });
-    gsap.from('.hero-title', { y: 30, opacity: 0, duration: 1, delay: 0.2, ease: 'power3.out' });
-    gsap.from('.hero-text', { y: 20, opacity: 0, duration: 1, delay: 0.4, ease: 'power3.out' });
-    gsap.from('.hero-btn', { scale: 0.8, opacity: 0, duration: 0.8, delay: 0.6, ease: 'back.out(1.7)' });
+    // Removed Hero Animations to prevent text from disappearing
 
     // Scroll Animations for sections (if IntersectionObserver was needed, we'd use ScrollTrigger, 
     // but for simplicity we will just do a fast stagger fade-in when component mounts)
@@ -66,17 +62,17 @@ export const LandingPage = () => {
         <div className="absolute bottom-[-20%] right-[20%] w-80 h-80 bg-[#F59E0B] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 relative z-10 text-center">
-          <div className="hero-badge inline-flex items-center justify-center bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full mb-6 border border-white/30 text-white font-medium shadow-sm">
+          <div className="inline-flex items-center justify-center bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full mb-6 border border-white/30 text-white font-medium shadow-sm">
             <Sparkles className="w-5 h-5 mr-2 text-yellow-300" />
             <span className="tracking-wide">Welcome to the Ultimate Toy Universe!</span>
           </div>
-          <h1 className="hero-title text-5xl sm:text-7xl md:text-8xl font-black tracking-tight mb-6 drop-shadow-lg leading-tight">
+          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight mb-6 drop-shadow-lg leading-tight">
             Play.<br className="md:hidden" /> Discover.<br className="md:hidden" /> <span className="text-yellow-300">Grow.</span>
           </h1>
-          <p className="hero-text text-lg sm:text-2xl text-indigo-100 mb-10 max-w-2xl mx-auto font-medium leading-relaxed px-4">
+          <p className="text-lg sm:text-2xl text-indigo-100 mb-10 max-w-2xl mx-auto font-medium leading-relaxed px-4">
             Find the perfect toys that spark joy and imagination for every age. Let the adventure begin!
           </p>
-          <div className="hero-btn flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <Link 
               to="/catalog" 
               className="group inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-extrabold rounded-full bg-[#FCD34D] text-[#78350F] hover:bg-[#FBBF24] hover:scale-105 hover:-translate-y-1 transition-all shadow-[0_8px_0_0_#D97706] hover:shadow-[0_4px_0_0_#D97706] active:translate-y-2 active:shadow-none"
