@@ -53,16 +53,20 @@ export const Navbar = ({ variant = 'default' }) => {
 
   const homeLink = isAdminRoute ? '/admin' : (uiMode === 'mode2' ? '/' : '/menu');
 
+  const isLandingPage = location.pathname === '/';
+
   return (
-    <div className={uiMode === 'mode2' ? `fixed top-4 left-0 right-0 z-50 px-4 pointer-events-none transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-[150%]'}` : 'sticky top-0 z-50'}>
+    <div className={uiMode === 'mode2' && isLandingPage ? `fixed top-4 left-0 right-0 z-50 px-4 pointer-events-none transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-[150%]'}` : 'sticky top-0 z-50'}>
       <nav className={`
         ${uiMode === 'mode2'
-          ? "bg-white/80 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-200/50 rounded-full max-w-5xl mx-auto pointer-events-auto transition-all"
+          ? isLandingPage 
+            ? "bg-white/80 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-200/50 rounded-full max-w-5xl mx-auto pointer-events-auto transition-all"
+            : "bg-white border-b border-slate-100"
           : "bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm"}
-        ${uiMode === 'mode2' ? 'px-4 py-2' : ''}
+        ${uiMode === 'mode2' && isLandingPage ? 'px-4 py-2' : ''}
       `} aria-label="Navigasi utama">
-        <div className={`container mx-auto ${uiMode === 'mode2' ? 'px-2' : 'px-4'}`}>
-          <div className="flex items-center justify-between h-14">
+        <div className={`container mx-auto ${uiMode === 'mode2' && isLandingPage ? 'px-2' : 'px-4'}`}>
+          <div className="flex items-center justify-between h-14 sm:h-16">
             <Link
               to={homeLink}
               className={`flex items-center gap-2 ${uiMode === 'mode2' && !isAdminRoute ? 'text-indigo-900 group' : 'text-white'}`}
