@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import * as ProductController from '../../../controllers/productController';
 import { formatPrice } from '../../../utils/helpers';
+import { RevealImageList } from '../../../components/ui/reveal-images';
 
 export const LandingPage = () => {
   const [products, setProducts] = useState([]);
@@ -61,25 +62,31 @@ export const LandingPage = () => {
         <div className="absolute top-[20%] left-[-10%] w-72 h-72 bg-[#10B981] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
         <div className="absolute bottom-[-20%] right-[20%] w-80 h-80 bg-[#F59E0B] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 relative z-10 text-center">
-          <div className="inline-flex items-center justify-center bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full mb-6 border border-white/30 text-white font-medium shadow-sm">
-            <Sparkles className="w-5 h-5 mr-2 text-yellow-300" />
-            <span className="tracking-wide">Welcome to the Ultimate Toy Universe!</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="text-center lg:text-left">
+            <div className="inline-flex items-center justify-center bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full mb-6 border border-white/30 text-white font-medium shadow-sm">
+              <Sparkles className="w-5 h-5 mr-2 text-yellow-300" />
+              <span className="tracking-wide">Welcome to the Ultimate Toy Universe!</span>
+            </div>
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight mb-6 drop-shadow-lg leading-tight">
+              Play.<br className="md:hidden" /> Discover.<br className="md:hidden" /> <span className="text-yellow-300">Grow.</span>
+            </h1>
+            <p className="text-lg sm:text-2xl text-indigo-100 mb-10 max-w-2xl mx-auto lg:mx-0 font-medium leading-relaxed">
+              Find the perfect toys that spark joy and imagination for every age. Let the adventure begin!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start items-center">
+              <Link 
+                to="/catalog" 
+                className="group inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-extrabold rounded-full bg-[#FCD34D] text-[#78350F] hover:bg-[#FBBF24] hover:scale-105 hover:-translate-y-1 transition-all shadow-[0_8px_0_0_#D97706] hover:shadow-[0_4px_0_0_#D97706] active:translate-y-2 active:shadow-none"
+              >
+                Shop Toys Now
+                <Rocket className="ml-3 w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </Link>
+            </div>
           </div>
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight mb-6 drop-shadow-lg leading-tight">
-            Play.<br className="md:hidden" /> Discover.<br className="md:hidden" /> <span className="text-yellow-300">Grow.</span>
-          </h1>
-          <p className="text-lg sm:text-2xl text-indigo-100 mb-10 max-w-2xl mx-auto font-medium leading-relaxed px-4">
-            Find the perfect toys that spark joy and imagination for every age. Let the adventure begin!
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Link 
-              to="/catalog" 
-              className="group inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-extrabold rounded-full bg-[#FCD34D] text-[#78350F] hover:bg-[#FBBF24] hover:scale-105 hover:-translate-y-1 transition-all shadow-[0_8px_0_0_#D97706] hover:shadow-[0_4px_0_0_#D97706] active:translate-y-2 active:shadow-none"
-            >
-              Shop Toys Now
-              <Rocket className="ml-3 w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-            </Link>
+          
+          <div className="hidden lg:block relative z-20">
+             <RevealImageList />
           </div>
         </div>
       </header>

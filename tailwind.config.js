@@ -3,6 +3,11 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      colors: {
+        foreground: "hsl(var(--foreground, 222.2 84% 4.9%))",
+        background: "hsl(var(--background, 0 0% 100%))",
+        "muted-foreground": "hsl(var(--muted-foreground, 215.4 16.3% 46.9%))",
+      },
       animation: {
         blob: "blob 7s infinite",
       },
