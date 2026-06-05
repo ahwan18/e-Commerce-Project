@@ -7,9 +7,10 @@
  * You CAN modify the design and add new navigation items.
  */
 
-import { ShoppingCart, Store, LogOut, LayoutDashboard, User } from 'lucide-react';
+import { ShoppingCart, Store, LogOut, LayoutDashboard, User, Package, ChevronDown } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
+import { Menu, Transition } from '@headlessui/react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
@@ -112,23 +113,64 @@ export const Navbar = ({ variant = 'default' }) => {
                   {uiMode === 'mode2' && (
                     <>
                       {isAuthenticated ? (
-                        <div className="flex items-center gap-1 sm:gap-3 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
-                          <Link
-                            to="/account"
-                            className="text-slate-600 hover:text-indigo-600 font-bold text-sm transition-colors flex items-center gap-1.5"
+                        <Menu as="div" className="relative inline-block text-left z-50">
+                          <div>
+                            <Menu.Button className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-2 rounded-full font-bold text-sm transition-colors border border-indigo-100 shadow-sm">
+                              <div className="bg-indigo-200 text-indigo-700 rounded-full p-1 border border-indigo-300">
+                                <User size={14} />
+                              </div>
+                              <span className="hidden sm:inline">My Account</span>
+                              <ChevronDown size={14} className="opacity-70" />
+                            </Menu.Button>
+                          </div>
+                          
+                          <Transition
+                            as={Fragment}
+                            enter="transition ease-out duration-100"
+                            enterFrom="transform opacity-0 scale-95"
+                            enterTo="transform opacity-100 scale-100"
+                            leave="transition ease-in duration-75"
+                            leaveFrom="transform opacity-100 scale-100"
+                            leaveTo="transform opacity-0 scale-95"
                           >
-                            <User size={16} />
-                            <span className="hidden sm:inline">Account</span>
-                          </Link>
-                          <div className="w-px h-4 bg-slate-200 hidden sm:block"></div>
-                          <button
-                            onClick={handleLogout}
-                            className="text-slate-400 hover:text-red-500 font-bold text-sm transition-colors flex items-center gap-1"
-                            aria-label="Logout"
-                          >
-                            <LogOut size={16} />
-                          </button>
-                        </div>
+                            <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-slate-100 rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] border-2 border-slate-100 focus:outline-none overflow-hidden">
+                              <div className="px-4 py-3 bg-slate-50">
+                                <p className="text-xs text-slate-500 font-bold uppercase mb-1">Signed in as</p>
+                                <p className="text-sm font-black text-slate-900 truncate">Customer</p>
+                              </div>
+                              <div className="p-2">
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button
+                                      onClick={() => navigate('/account')}
+                                      className={`${
+                                        active ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700'
+                                      } group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors`}
+                                    >
+                                      <Package size={16} className={active ? 'text-indigo-500' : 'text-slate-400'} />
+                                      Orders & Tracking
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              </div>
+                              <div className="p-2">
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button
+                                      onClick={handleLogout}
+                                      className={`${
+                                        active ? 'bg-red-50 text-red-600' : 'text-slate-700'
+                                      } group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors`}
+                                    >
+                                      <LogOut size={16} className={active ? 'text-red-500' : 'text-slate-400'} />
+                                      Sign Out
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              </div>
+                            </Menu.Items>
+                          </Transition>
+                        </Menu>
                       ) : (
                         <Link
                           to="/login"
