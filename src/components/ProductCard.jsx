@@ -63,7 +63,7 @@ export const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
         <Button
           onClick={(e) => {
             e.stopPropagation();
-            onAddToCart(product);
+            onAddToCart(e, product);
           }}
           aria-label={`Tambah ${product.name} ke keranjang`}
           disabled={isOutOfStock}
