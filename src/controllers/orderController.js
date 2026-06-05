@@ -11,6 +11,19 @@
 import * as OrderModel from '../models/orderModel';
 import * as ProductModel from '../models/productModel';
 import { processPayment } from '../services/paymentService';
+import { supabase } from '../services/supabaseClient';
+
+/**
+ * Generate a human-readable order number
+ * Pattern: TOY-YYYYMM-XXXXX (e.g., TOY-202606-A7B2C)
+ */
+const generateOrderNumber = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+  return `TOY-${year}${month}-${randomStr}`;
+};
 
 /**
  * Debug utility
@@ -47,8 +60,12 @@ export const createOrder = async (orderData) => {
       throw new Error('Cart is empty');
     }
 
-    // Allow null counter_id and session_id for Mode 2 (online orders)
-    // Mode 1 will still pass them.
+    // Fetch the currently authenticated user to link the order
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Generate the human-readable order number
+    const orderNumber = generateOrderNumber();
+
     const order = await OrderModel.createOrder({
       customer_name: orderData.customer_name,
       customer_phone: orderData.customer_phone,
@@ -56,6 +73,8 @@ export const createOrder = async (orderData) => {
       status: 'pending',
       counter_id: orderData.counter_id,
       session_id: orderData.session_id,
+      user_id: user?.id || null, // Link to user if logged in, else null (Guest)
+      order_number: orderNumber,
     });
     debugLog('Order created:', order);
 
@@ -196,5 +215,21 @@ export const fetchRecentOrders = async (limit = 10) => {
   } catch (error) {
     console.error('Error fetching recent orders:', error);
     throw new Error('Failed to load recent orders');
+  }
+};
+
+/**
+ * Fetch all orders for a specific authenticated user
+ * @param {string} userId - The Supabase user ID
+ * @returns {Promise<Array>} User's order history
+ */
+export const fetchUserOrders = async (userId) => {
+  try {
+    if (!userId) throw new Error('User ID is required to fetch orders');
+    const orders = await OrderModel.getOrdersByUserId(userId);
+    return orders;
+  } catch (error) {
+    console.error('Error fetching user orders:', error);
+    throw new Error('Failed to load your orders');
   }
 };

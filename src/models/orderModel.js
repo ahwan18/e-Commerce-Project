@@ -203,3 +203,37 @@ export const getRecentOrders = async (limit = 10) => {
   if (error) throw error;
   return data;
 };
+
+/**
+ * Fetch orders for a specific user
+ * @param {string} userId - The Supabase auth user ID
+ * @returns {Promise<Array>} Array of orders with items
+ */
+export const getOrdersByUserId = async (userId) => {
+  const { data, error } = await supabase
+    .from('orders')
+    .select(
+      `
+      *,
+      counter:counters (
+        id,
+        name
+      ),
+      order_items (
+        id,
+        quantity,
+        price,
+        product:products (
+          id,
+          name,
+          image_url
+        )
+      )
+    `
+    )
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
