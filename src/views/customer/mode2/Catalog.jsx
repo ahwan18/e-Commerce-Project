@@ -131,7 +131,7 @@ export const Catalog = () => {
       )}
 
       {/* Playful Header */}
-      <div className="bg-[#4F46E5] text-white pt-24 pb-24 rounded-b-[3rem] px-4 relative overflow-hidden shadow-md">
+      <div className="bg-[#4F46E5] text-white pt-36 pb-28 sm:pt-40 sm:pb-32 rounded-b-[3rem] sm:rounded-b-[4rem] px-4 relative overflow-hidden shadow-md">
          <div className="absolute top-[-50%] right-[-10%] w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
          <div className="max-w-7xl mx-auto relative z-10 text-center">
             <h1 className="text-4xl md:text-5xl font-black mb-4">The Toy Catalog</h1>
@@ -155,7 +155,7 @@ export const Catalog = () => {
         </div>
 
         {/* Search & Filter Bar */}
-        <div className="bg-white rounded-[2rem] p-4 sm:p-6 shadow-xl border-2 border-slate-100 mb-10 flex flex-col md:flex-row gap-4">
+        <div className="bg-white rounded-[2rem] p-4 sm:p-6 shadow-xl border-2 border-slate-100 mb-8 sm:mb-10 flex flex-col md:flex-row gap-4 relative z-30">
           <div className="flex-grow relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input 

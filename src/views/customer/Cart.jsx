@@ -102,11 +102,11 @@ export const Cart = () => {
                 key={item.id}
                 className={`p-4 sm:p-6 transition-all ${isMode2 ? 'bg-white rounded-3xl shadow-sm border-2 border-slate-100' : 'surface-card hover:shadow-md transition-shadow'}`}
               >
-                <div className="flex gap-6">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   <img
                     src={item.image_url || 'https://via.placeholder.com/150x150?text=No+Image'}
                     alt={item.name}
-                    className={`w-32 h-32 object-cover ${isMode2 ? 'rounded-2xl border-2 border-slate-50' : 'rounded-xl'}`}
+                    className={`w-full sm:w-32 h-48 sm:h-32 object-cover flex-shrink-0 ${isMode2 ? 'rounded-2xl border-2 border-slate-50' : 'rounded-xl'}`}
                   />
 
                   <div className="flex-1 flex flex-col justify-center">
@@ -118,38 +118,38 @@ export const Cart = () => {
                     </p>
 
                     <div className="flex items-center justify-between mt-auto">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <button
                           onClick={() =>
                             handleUpdateQuantity(item.id, item.quantity - 1)
                           }
-                          className={`rounded-full p-2 transition-transform active:scale-95 min-h-11 min-w-11 flex items-center justify-center ${isMode2 ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-slate-100 hover:bg-slate-200'}`}
+                          className={`rounded-full p-2 transition-transform active:scale-95 w-10 h-10 sm:min-h-11 sm:min-w-11 flex items-center justify-center ${isMode2 ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-slate-100 hover:bg-slate-200'}`}
                           disabled={item.quantity <= 1}
                           aria-label={`Kurangi jumlah ${item.name}`}
                         >
-                          <Minus size={20} />
+                          <Minus size={18} />
                         </button>
-                        <span className={`text-xl w-10 text-center ${isMode2 ? 'font-black' : 'font-bold'}`}>
+                        <span className={`text-xl w-8 sm:w-10 text-center ${isMode2 ? 'font-black' : 'font-bold'}`}>
                           {item.quantity}
                         </span>
                         <button
                           onClick={() =>
                             handleUpdateQuantity(item.id, item.quantity + 1)
                           }
-                          className={`rounded-full p-2 transition-transform active:scale-95 min-h-11 min-w-11 flex items-center justify-center ${isMode2 ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-slate-100 hover:bg-slate-200'}`}
+                          className={`rounded-full p-2 transition-transform active:scale-95 w-10 h-10 sm:min-h-11 sm:min-w-11 flex items-center justify-center ${isMode2 ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-slate-100 hover:bg-slate-200'}`}
                           disabled={item.quantity >= item.stock}
                           aria-label={`Tambah jumlah ${item.name}`}
                         >
-                          <Plus size={20} />
+                          <Plus size={18} />
                         </button>
                       </div>
 
                       <button
                         onClick={() => handleRemoveItem(item.id)}
-                        className={`flex items-center gap-2 font-semibold transition-colors min-h-11 px-3 rounded-xl ${isMode2 ? 'text-pink-500 hover:bg-pink-50' : 'text-red-600 hover:text-red-700'}`}
+                        className={`flex items-center gap-2 font-semibold transition-colors h-10 sm:min-h-11 px-3 rounded-xl ${isMode2 ? 'text-pink-500 hover:bg-pink-50' : 'text-red-600 hover:text-red-700'}`}
                         aria-label={`Hapus ${item.name} dari keranjang`}
                       >
-                        <Trash2 size={20} />
+                        <Trash2 size={18} />
                         <span className="hidden sm:inline">{isMode2 ? 'Remove' : 'Hapus'}</span>
                       </button>
                     </div>
