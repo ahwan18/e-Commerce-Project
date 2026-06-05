@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Star, Sparkles, Rocket, Heart, Shield, Zap, Mail, Quote } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import * as ProductController from '../../../controllers/productController';
 import { formatPrice } from '../../../utils/helpers';
 
@@ -8,6 +10,8 @@ export const LandingPage = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const container = useRef();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -17,7 +21,6 @@ export const LandingPage = () => {
           ProductController.fetchCategories()
         ]);
         
-        // Take a few random or top products for the "Featured" section
         setProducts(fetchedProducts.slice(0, 4));
         setCategories(fetchedCategories);
       } catch (error) {
@@ -30,8 +33,30 @@ export const LandingPage = () => {
     fetchData();
   }, []);
 
+  useGSAP(() => {
+    // Hero Animations
+    gsap.from('.hero-badge', { y: -20, opacity: 0, duration: 0.8, ease: 'back.out(1.7)' });
+    gsap.from('.hero-title', { y: 30, opacity: 0, duration: 1, delay: 0.2, ease: 'power3.out' });
+    gsap.from('.hero-text', { y: 20, opacity: 0, duration: 1, delay: 0.4, ease: 'power3.out' });
+    gsap.from('.hero-btn', { scale: 0.8, opacity: 0, duration: 0.8, delay: 0.6, ease: 'back.out(1.7)' });
+
+    // Scroll Animations for sections (if IntersectionObserver was needed, we'd use ScrollTrigger, 
+    // but for simplicity we will just do a fast stagger fade-in when component mounts)
+    if (!loading) {
+       gsap.from('.magic-card', {
+         y: 50,
+         opacity: 0,
+         duration: 0.8,
+         stagger: 0.15,
+         ease: 'power3.out',
+         delay: 0.5
+       });
+    }
+
+  }, { scope: container, dependencies: [loading] });
+
   return (
-    <div className="min-h-screen bg-[#FDF8F5] flex flex-col font-sans selection:bg-pink-300 selection:text-pink-900 overflow-x-hidden">
+    <div ref={container} className="min-h-screen bg-[#FDF8F5] flex flex-col font-sans selection:bg-pink-300 selection:text-pink-900 overflow-x-hidden">
       
       {/* Playful Hero Section */}
       <header className="relative bg-[#4F46E5] text-white overflow-hidden rounded-b-[3rem] sm:rounded-b-[5rem] shadow-2xl z-10 mb-16">
@@ -41,17 +66,17 @@ export const LandingPage = () => {
         <div className="absolute bottom-[-20%] right-[20%] w-80 h-80 bg-[#F59E0B] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 relative z-10 text-center">
-          <div className="inline-flex items-center justify-center bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full mb-6 border border-white/30 text-white font-medium shadow-sm">
+          <div className="hero-badge inline-flex items-center justify-center bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full mb-6 border border-white/30 text-white font-medium shadow-sm">
             <Sparkles className="w-5 h-5 mr-2 text-yellow-300" />
             <span className="tracking-wide">Welcome to the Ultimate Toy Universe!</span>
           </div>
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight mb-6 drop-shadow-lg leading-tight">
+          <h1 className="hero-title text-5xl sm:text-7xl md:text-8xl font-black tracking-tight mb-6 drop-shadow-lg leading-tight">
             Play.<br className="md:hidden" /> Discover.<br className="md:hidden" /> <span className="text-yellow-300">Grow.</span>
           </h1>
-          <p className="text-lg sm:text-2xl text-indigo-100 mb-10 max-w-2xl mx-auto font-medium leading-relaxed px-4">
+          <p className="hero-text text-lg sm:text-2xl text-indigo-100 mb-10 max-w-2xl mx-auto font-medium leading-relaxed px-4">
             Find the perfect toys that spark joy and imagination for every age. Let the adventure begin!
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <div className="hero-btn flex flex-col sm:flex-row gap-6 justify-center items-center">
             <Link 
               to="/catalog" 
               className="group inline-flex items-center justify-center px-8 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-extrabold rounded-full bg-[#FCD34D] text-[#78350F] hover:bg-[#FBBF24] hover:scale-105 hover:-translate-y-1 transition-all shadow-[0_8px_0_0_#D97706] hover:shadow-[0_4px_0_0_#D97706] active:translate-y-2 active:shadow-none"
@@ -73,7 +98,7 @@ export const LandingPage = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-[2rem] p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-pink-100 hover:-translate-y-2 transition-transform">
+            <div className="magic-card bg-white rounded-[2rem] p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-pink-100 hover:-translate-y-2 transition-transform">
               <div className="w-20 h-20 bg-pink-100 text-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3">
                 <Heart className="w-10 h-10 fill-current" />
               </div>
@@ -81,7 +106,7 @@ export const LandingPage = () => {
               <p className="text-slate-600 font-medium">Every toy is carefully curated to ensure it brings maximum joy and creativity to your child's playtime.</p>
             </div>
             
-            <div className="bg-white rounded-[2rem] p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-emerald-100 hover:-translate-y-2 transition-transform">
+            <div className="magic-card bg-white rounded-[2rem] p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-emerald-100 hover:-translate-y-2 transition-transform">
               <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-6 -rotate-3">
                 <Shield className="w-10 h-10" />
               </div>
@@ -89,7 +114,7 @@ export const LandingPage = () => {
               <p className="text-slate-600 font-medium">We strictly adhere to global safety standards. Non-toxic materials and zero sharp edges—guaranteed.</p>
             </div>
             
-            <div className="bg-white rounded-[2rem] p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-yellow-100 hover:-translate-y-2 transition-transform">
+            <div className="magic-card bg-white rounded-[2rem] p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-yellow-100 hover:-translate-y-2 transition-transform">
               <div className="w-20 h-20 bg-yellow-100 text-yellow-500 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-6">
                 <Zap className="w-10 h-10 fill-current" />
               </div>

@@ -1,6 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Filter, ShoppingBag } from 'lucide-react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { useCart } from '../../../context/CartContext';
 import { formatPrice } from '../../../utils/helpers';
 import * as ProductController from '../../../controllers/productController';
@@ -20,6 +22,8 @@ export const Catalog = () => {
   
   // Minimal filters for Mode 2
   const [sortBy, setSortBy] = useState('recommended');
+
+  const container = useRef();
 
   useEffect(() => {
     loadProducts();
@@ -89,6 +93,20 @@ export const Catalog = () => {
     return products;
   }, [activeCategory, allProducts, searchQuery, sortBy]);
 
+  useGSAP(() => {
+    if (!loading && filteredProducts.length > 0) {
+      // Small pop-in animation for products when they load or filter changes
+      gsap.from('.product-card', {
+        scale: 0.9,
+        opacity: 0,
+        duration: 0.4,
+        stagger: 0.05,
+        ease: 'back.out(1.5)',
+        clearProps: 'all' // Cleanup after animation to avoid transform conflicts with hover
+      });
+    }
+  }, { scope: container, dependencies: [loading, filteredProducts] });
+
   const handleAddToCart = (e, product) => {
     e.preventDefault();
     e.stopPropagation();
@@ -104,7 +122,7 @@ export const Catalog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF8F5] font-sans">
+    <div ref={container} className="min-h-screen bg-[#FDF8F5] font-sans">
       {notification && (
         <div className="fixed top-20 right-4 bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-xl z-50 animate-bounce font-bold border-2 border-emerald-400">
           ✨ {notification}
@@ -192,7 +210,7 @@ export const Catalog = () => {
               <div 
                 key={product.id} 
                 onClick={() => navigate(`/shop/product/${product.id}`)}
-                className="group bg-white rounded-[2rem] p-4 shadow-sm border-2 border-slate-100 hover:border-pink-300 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col cursor-pointer"
+                className="product-card group bg-white rounded-[2rem] p-4 shadow-sm border-2 border-slate-100 hover:border-pink-300 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col cursor-pointer"
               >
                 <div className="bg-slate-50 rounded-2xl aspect-square mb-4 overflow-hidden relative">
                   <img 
