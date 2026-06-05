@@ -130,7 +130,7 @@ export const Catalog = () => {
       )}
 
       {/* Playful Header */}
-      <div className="bg-[#4F46E5] text-white pt-12 pb-24 rounded-b-[3rem] px-4 relative overflow-hidden shadow-md">
+      <div className="bg-[#4F46E5] text-white pt-24 pb-24 rounded-b-[3rem] px-4 relative overflow-hidden shadow-md">
          <div className="absolute top-[-50%] right-[-10%] w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
          <div className="max-w-7xl mx-auto relative z-10 text-center">
             <h1 className="text-4xl md:text-5xl font-black mb-4">The Toy Catalog</h1>

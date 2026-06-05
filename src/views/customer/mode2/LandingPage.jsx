@@ -55,7 +55,7 @@ export const LandingPage = () => {
     <div ref={container} className="min-h-screen bg-[#FDF8F5] flex flex-col font-sans selection:bg-pink-300 selection:text-pink-900 overflow-x-hidden">
       
       {/* Playful Hero Section */}
-      <header className="relative bg-[#4F46E5] text-white overflow-hidden rounded-b-[3rem] sm:rounded-b-[5rem] shadow-2xl z-10 mb-16">
+      <header className="relative bg-[#4F46E5] text-white overflow-hidden rounded-b-[3rem] sm:rounded-b-[5rem] shadow-2xl z-10 mb-16 pt-20">
         {/* Abstract Background Shapes */}
         <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-[#EC4899] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
         <div className="absolute top-[20%] left-[-10%] w-72 h-72 bg-[#10B981] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
