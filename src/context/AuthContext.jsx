@@ -69,6 +69,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signUp = async (email, password) => {
+    try {
+      setLoading(true);
+      const data = await AuthController.register(email, password);
+      // Depending on Supabase configuration (e.g. requires email confirmation),
+      // the session might be null.
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.user);
+      }
+      return { success: true, message: data.session ? null : 'Check your email for confirmation link' };
+    } catch (error) {
+      console.error('Sign up error:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       setLoading(true);
@@ -89,6 +108,7 @@ export const AuthProvider = ({ children }) => {
     session,
     loading,
     signIn,
+    signUp,
     signOut,
     isAuthenticated: !!user,
   };

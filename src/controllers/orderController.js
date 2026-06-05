@@ -47,11 +47,8 @@ export const createOrder = async (orderData) => {
       throw new Error('Cart is empty');
     }
 
-    if (!orderData.counter_id || !orderData.session_id) {
-      debugLog('Missing counter/session context');
-      throw new Error('Counter session is required');
-    }
-
+    // Allow null counter_id and session_id for Mode 2 (online orders)
+    // Mode 1 will still pass them.
     const order = await OrderModel.createOrder({
       customer_name: orderData.customer_name,
       customer_phone: orderData.customer_phone,

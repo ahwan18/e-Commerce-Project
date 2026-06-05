@@ -36,6 +36,31 @@ export const login = async (email, password) => {
 };
 
 /**
+ * Register a new user (Customer)
+ * @param {string} email - User email
+ * @param {string} password - User password
+ * @returns {Promise<Object>} Auth session
+ */
+export const register = async (email, password) => {
+  try {
+    if (!email || !password) {
+      throw new Error('Email and password are required');
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Registration error:', error);
+    throw error;
+  }
+};
+
+/**
  * Logout current user
  * @returns {Promise<void>}
  */

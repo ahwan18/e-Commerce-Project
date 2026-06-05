@@ -2,30 +2,39 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 
-export const CustomerLogin = () => {
+export const CustomerRegister = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { signIn } = useAuth();
+  // Need to implement signUp in AuthContext
+  const { signUp } = useAuth(); 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { success, error: signInError } = await signIn(email, password);
+      // Assuming signUp exists on useAuth
+      const { success, error: signUpError } = await signUp(email, password);
       
       if (success) {
         // Redirect to wherever they were trying to go, or catalog
         const from = location.state?.from?.pathname || '/catalog';
         navigate(from, { replace: true });
       } else {
-        setError(signInError || 'Failed to login');
+        setError(signUpError || 'Failed to register');
       }
     } catch (err) {
       setError(err.message);
@@ -38,8 +47,8 @@ export const CustomerLogin = () => {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <div className="surface-card p-8 w-full max-w-md shadow-xl rounded-2xl">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h2>
-          <p className="text-slate-600">Please login to continue shopping.</p>
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">Create Account</h2>
+          <p className="text-slate-600">Join us to start shopping.</p>
         </div>
         
         {error && (
@@ -48,7 +57,7 @@ export const CustomerLogin = () => {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleRegister} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
             <input 
@@ -71,6 +80,17 @@ export const CustomerLogin = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
+            <input 
+              type="password" 
+              required
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none" 
+              placeholder="••••••••" 
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
           <button 
             type="submit" 
             disabled={loading}
@@ -79,13 +99,13 @@ export const CustomerLogin = () => {
             {loading ? (
               <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
             ) : (
-              'Sign In'
+              'Register'
             )}
           </button>
         </form>
         
         <div className="mt-6 text-center text-sm text-slate-600">
-          <p>Don't have an account? <a href="/register" className="text-indigo-600 hover:underline font-medium">Create one</a></p>
+          <p>Already have an account? <a href="/login" className="text-indigo-600 hover:underline">Sign In</a></p>
         </div>
       </div>
     </div>

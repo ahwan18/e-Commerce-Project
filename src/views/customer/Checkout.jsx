@@ -63,13 +63,15 @@ export const Checkout = () => {
       setLoading(true);
       setError(null);
 
+      // In Mode 2, counterId and sessionId might be undefined.
+      // We pass them anyway; the backend should handle nulls for online orders if configured properly.
       const orderData = {
         customer_name: formData.customer_name,
         customer_phone: formData.customer_phone,
         items: cart,
         total_amount: cartTotal,
-        counter_id: counterId,
-        session_id: sessionId,
+        counter_id: counterId || null,
+        session_id: sessionId || null,
       };
 
       const result = await OrderController.createOrder(orderData);

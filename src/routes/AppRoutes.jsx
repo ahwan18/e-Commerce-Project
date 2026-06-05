@@ -26,6 +26,7 @@ import { OrderTracking } from '../views/customer/OrderTracking';
 import { LandingPage as Mode2Landing } from '../views/customer/mode2/LandingPage';
 import { Catalog as Mode2Catalog } from '../views/customer/mode2/Catalog';
 import { CustomerLogin as Mode2Login } from '../views/customer/mode2/CustomerLogin';
+import { CustomerRegister as Mode2Register } from '../views/customer/mode2/CustomerRegister';
 import { CustomerProtectedRoute } from './CustomerProtectedRoute';
 
 // Admin Views
@@ -132,6 +133,7 @@ export const AppRoutes = () => {
             <Route path="/catalog" element={<><Navbar /><Mode2Catalog /></>} />
             <Route path="/shop/product/:id" element={<><Navbar /><ProductDetail /></>} />
             <Route path="/login" element={<Mode2Login />} />
+            <Route path="/register" element={<Mode2Register />} />
             
             {/* Customer Protected Routes */}
             <Route path="/shop/cart" element={
