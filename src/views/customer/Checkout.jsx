@@ -7,12 +7,14 @@
  * All logic is handled through controllers.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertCircle, MapPin, Truck, CreditCard, ShieldCheck } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { useCart } from '../../context/CartContext';
 import { useCounter } from '../../context/CounterContext';
+import { useSettings } from '../../context/SettingsContext';
+import { useAuth } from '../../context/AuthContext';
 import { formatPrice, validatePhone } from '../../utils/helpers';
 import * as OrderController from '../../controllers/orderController';
 
@@ -20,15 +22,43 @@ export const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, clearCart } = useCart();
   const { counterId, sessionId, counterName, releaseSession } = useCounter();
+  const { uiMode } = useSettings();
+  const { user } = useAuth();
+  
+  const isMode2 = uiMode === 'mode2';
 
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_phone: '',
+    address: '',
+    city: '',
+    postal_code: '',
   });
+  
+  const [shippingMethod, setShippingMethod] = useState('regular');
+  const [shippingCost, setShippingCost] = useState(0);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState(null);
+
+  useEffect(() => {
+    if (isMode2 && user) {
+      setFormData(prev => ({
+        ...prev,
+        customer_name: prev.customer_name || user.user_metadata?.full_name || '',
+      }));
+    }
+  }, [isMode2, user]);
+
+  useEffect(() => {
+    if (shippingMethod === 'regular') setShippingCost(isMode2 ? 15000 : 0);
+    else if (shippingMethod === 'express') setShippingCost(35000);
+    else setShippingCost(0);
+  }, [shippingMethod, isMode2]);
+
+  const finalTotal = cartTotal + (isMode2 ? shippingCost : 0);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -53,6 +83,11 @@ export const Checkout = () => {
       setError('Nomor telepon tidak valid');
       return;
     }
+    
+    if (isMode2 && (!formData.address.trim() || !formData.city.trim())) {
+      setError('Alamat pengiriman lengkap harus diisi');
+      return;
+    }
 
     if (cart.length === 0) {
       setError('Keranjang kosong');
@@ -69,7 +104,7 @@ export const Checkout = () => {
         customer_name: formData.customer_name,
         customer_phone: formData.customer_phone,
         items: cart,
-        total_amount: cartTotal,
+        total_amount: finalTotal,
         counter_id: counterId || null,
         session_id: sessionId || null,
       };
@@ -105,29 +140,34 @@ export const Checkout = () => {
 
   if (success) {
     return (
-      <main className="page-shell">
+      <main className={`page-shell ${isMode2 ? 'bg-[#FDF8F5]' : ''}`}>
         <div className="page-container">
-          <div className="max-w-2xl mx-auto text-center py-16">
-            <CheckCircle size={100} className="mx-auto text-green-500 mb-6" />
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          <div className={`max-w-2xl mx-auto text-center py-16 ${isMode2 ? 'bg-white rounded-[3rem] shadow-xl border-2 border-slate-100 p-12' : ''}`}>
+            <CheckCircle size={100} className="mx-auto text-emerald-500 mb-6" />
+            <h1 className={`text-4xl mb-4 ${isMode2 ? 'font-black text-slate-900' : 'font-bold text-gray-800'}`}>
               Pembayaran Berhasil!
             </h1>
-            <p className="text-gray-600 text-lg mb-4">
+            <p className={`text-lg mb-4 ${isMode2 ? 'font-medium text-slate-500' : 'text-gray-600'}`}>
               Terima kasih. Pesananmu sedang kami proses.
             </p>
             {orderId && (
-              <p className="text-gray-600 text-lg mb-8">
-                ID Pesanan: <span className="font-bold text-blue-600">{orderId.substring(0, 8).toUpperCase()}</span>
-              </p>
+              <div className={`p-4 rounded-2xl inline-block mb-8 ${isMode2 ? 'bg-indigo-50 border-2 border-indigo-100' : ''}`}>
+                <p className={`text-lg ${isMode2 ? 'font-medium text-indigo-900' : 'text-gray-600'}`}>
+                  ID Pesanan: <span className="font-black text-indigo-600">{orderId.substring(0, 8).toUpperCase()}</span>
+                </p>
+              </div>
             )}
-            <Button
-              onClick={() => navigate(`/shop/track/${orderId}?counter_id=${counterId}`)}
-              variant="primary"
-              size="lg"
-              aria-label="Lacak pesanan"
-            >
-              Lacak Pesanan
-            </Button>
+            <div>
+              <Button
+                onClick={() => navigate(isMode2 ? `/shop/track/${orderId}` : `/shop/track/${orderId}?counter_id=${counterId}`)}
+                variant="primary"
+                size="lg"
+                aria-label="Lacak pesanan"
+                className={isMode2 ? 'w-full sm:w-auto bg-[#4F46E5] hover:bg-[#4338CA] font-bold rounded-xl shadow-[0_4px_0_0_#3730A3] hover:translate-y-1 hover:shadow-none' : ''}
+              >
+                Lacak Pesanan
+              </Button>
+            </div>
           </div>
         </div>
       </main>
@@ -135,142 +175,232 @@ export const Checkout = () => {
   }
 
   return (
-    <main className="page-shell">
+    <main className={`page-shell ${isMode2 ? 'bg-[#FDF8F5]' : ''}`}>
       <div className="page-container pb-28">
         <Button
           onClick={() => navigate('/shop/cart')}
           variant="secondary"
           size="sm"
-          className="mb-6 flex items-center gap-2"
+          className={`mb-6 flex items-center gap-2 ${isMode2 ? 'bg-white border-2 border-slate-100 hover:border-slate-200 shadow-sm text-slate-700 font-bold' : ''}`}
           aria-label="Kembali ke keranjang"
         >
           <ArrowLeft size={18} />
           Kembali
         </Button>
 
-        <h1 className="text-3xl sm:text-4xl font-semibold text-slate-900 mb-6">Checkout</h1>
-        {counterName && (
+        <h1 className={`text-3xl sm:text-4xl mb-6 ${isMode2 ? 'font-black text-slate-900' : 'font-semibold text-slate-900'}`}>
+          Secure Checkout 🔒
+        </h1>
+        {counterName && !isMode2 && (
           <p className="text-blue-800 font-medium mb-4">Counter aktif: {counterName}</p>
         )}
-        <p className="text-sm text-slate-500 mb-4">Isi data singkat untuk menyelesaikan pesanan.</p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl mb-6 flex items-center gap-2" role="alert">
-            <AlertCircle size={20} />
+          <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-4 rounded-2xl mb-8 flex items-center gap-3 font-bold" role="alert">
+            <AlertCircle size={24} className="text-red-500" />
             {error}
           </div>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          <section className="surface-card p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold text-slate-900 mb-6">
-              Informasi Pembeli
-            </h2>
+        <div className="grid lg:grid-cols-5 gap-8">
+          <section className="lg:col-span-3 space-y-6">
+            
+            {/* Contact Info */}
+            <div className={`p-6 sm:p-8 ${isMode2 ? 'bg-white rounded-[2rem] shadow-sm border-2 border-slate-100' : 'surface-card'}`}>
+              <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                 <ShieldCheck className={isMode2 ? "text-indigo-600" : "text-gray-500"} /> Informasi Kontak
+              </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label
-                  htmlFor="customer_name"
-                  className="block text-lg font-semibold text-gray-700 mb-2"
-                >
-                  Nama
-                </label>
-                <input
-                  type="text"
-                  id="customer_name"
-                  name="customer_name"
-                  value={formData.customer_name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 text-lg border border-slate-300 rounded-xl focus:border-blue-500 focus:outline-none"
-                  placeholder="Masukkan nama"
-                  required
-                  aria-label="Nama pembeli"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="customer_phone"
-                  className="block text-lg font-semibold text-gray-700 mb-2"
-                >
-                  Nomor Telepon
-                </label>
-                <input
-                  type="tel"
-                  id="customer_phone"
-                  name="customer_phone"
-                  value={formData.customer_phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 text-lg border border-slate-300 rounded-xl focus:border-blue-500 focus:outline-none"
-                  placeholder="08xxxxxxxxxx"
-                  required
-                  aria-label="Nomor telepon pembeli"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Contoh: 081234567890
-                </p>
-              </div>
-
-              <Button
-                type="submit"
-                variant="success"
-                size="xl"
-                className="w-full"
-                disabled={loading}
-                aria-label="Bayar sekarang"
-              >
-                {loading ? 'Memproses...' : 'Bayar Sekarang'}
-              </Button>
-            </form>
-          </section>
-
-          <aside className="surface-card p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold text-slate-900 mb-6">
-              Ringkasan Pesanan
-            </h2>
-
-            <div className="space-y-4 mb-6">
-              {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-4 pb-4 border-b"
-                >
-                  <img
-                    src={item.image_url || 'https://via.placeholder.com/80x80?text=No+Image'}
-                    alt={item.name}
-                    className="w-20 h-20 object-cover rounded-lg"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800">
-                      {item.name}
-                    </h3>
-                    <p className="text-gray-600">
-                      {formatPrice(item.price)} x {item.quantity}
-                    </p>
+              <div className="space-y-5">
+                {isMode2 && user && (
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={user.email}
+                      disabled
+                      className="w-full px-4 py-3 bg-slate-100 border-2 border-slate-200 text-slate-500 rounded-xl font-medium cursor-not-allowed"
+                    />
                   </div>
-                  <span className="font-bold text-gray-800">
-                    {formatPrice(item.price * item.quantity)}
-                  </span>
+                )}
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <div>
+                    <label htmlFor="customer_name" className="block text-sm font-bold text-slate-700 mb-2">Nama Lengkap</label>
+                    <input
+                      type="text"
+                      id="customer_name"
+                      name="customer_name"
+                      value={formData.customer_name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:ring-0 focus:border-indigo-500 transition-colors outline-none font-medium"
+                      placeholder="Masukkan nama"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="customer_phone" className="block text-sm font-bold text-slate-700 mb-2">Nomor Telepon</label>
+                    <input
+                      type="tel"
+                      id="customer_phone"
+                      name="customer_phone"
+                      value={formData.customer_phone}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:ring-0 focus:border-indigo-500 transition-colors outline-none font-medium"
+                      placeholder="08xxxxxxxxxx"
+                      required
+                    />
+                  </div>
                 </div>
-              ))}
+              </div>
             </div>
 
-            <div className="border-t border-slate-200 pt-6">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-xl font-semibold text-gray-700">
-                  Total Item:
-                </span>
-                <span className="text-xl font-bold text-gray-800">
-                  {cart.reduce((sum, item) => sum + item.quantity, 0)} item
-                </span>
+            {/* Mode 2 Only: Shipping Info */}
+            {isMode2 && (
+              <div className="bg-white rounded-[2rem] shadow-sm border-2 border-slate-100 p-6 sm:p-8">
+                <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                  <MapPin className="text-pink-500" /> Alamat Pengiriman
+                </h2>
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Alamat Lengkap</label>
+                    <textarea
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      rows="3"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:ring-0 focus:border-pink-500 transition-colors outline-none font-medium resize-none"
+                      placeholder="Nama jalan, nomor rumah, RT/RW..."
+                      required
+                    ></textarea>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">Kota/Kabupaten</label>
+                      <input
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:ring-0 focus:border-pink-500 transition-colors outline-none font-medium"
+                        placeholder="Contoh: Jakarta Selatan"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">Kode Pos</label>
+                      <input
+                        type="text"
+                        name="postal_code"
+                        value={formData.postal_code}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:ring-0 focus:border-pink-500 transition-colors outline-none font-medium"
+                        placeholder="12345"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-gray-800">
-                  Total Bayar:
-                </span>
-                <span className="text-3xl font-bold text-blue-600">
-                  {formatPrice(cartTotal)}
-                </span>
+            )}
+
+            {/* Mode 2 Only: Shipping Method */}
+            {isMode2 && (
+              <div className="bg-white rounded-[2rem] shadow-sm border-2 border-slate-100 p-6 sm:p-8">
+                <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                  <Truck className="text-emerald-500" /> Metode Pengiriman
+                </h2>
+                <div className="space-y-4">
+                  <label className={`block p-4 rounded-xl border-2 cursor-pointer transition-all ${shippingMethod === 'regular' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <input type="radio" name="shipping" value="regular" checked={shippingMethod === 'regular'} onChange={() => setShippingMethod('regular')} className="w-5 h-5 text-emerald-600 focus:ring-emerald-500" />
+                        <div>
+                          <p className="font-bold text-slate-900">Reguler (2-3 Hari)</p>
+                          <p className="text-sm text-slate-500 font-medium">JNE, SiCepat, AnterAja</p>
+                        </div>
+                      </div>
+                      <span className="font-black text-slate-900">Rp 15.000</span>
+                    </div>
+                  </label>
+                  <label className={`block p-4 rounded-xl border-2 cursor-pointer transition-all ${shippingMethod === 'express' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <input type="radio" name="shipping" value="express" checked={shippingMethod === 'express'} onChange={() => setShippingMethod('express')} className="w-5 h-5 text-emerald-600 focus:ring-emerald-500" />
+                        <div>
+                          <p className="font-bold text-slate-900">Express (Besok Sampai)</p>
+                          <p className="text-sm text-slate-500 font-medium">Grab, Gojek, Paxel</p>
+                        </div>
+                      </div>
+                      <span className="font-black text-slate-900">Rp 35.000</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            )}
+            
+          </section>
+
+          <aside className="lg:col-span-2">
+            <div className={`p-6 sm:p-8 sticky top-24 ${isMode2 ? 'bg-[#1E1B4B] text-white rounded-[2rem] shadow-2xl overflow-hidden relative' : 'surface-card'}`}>
+              {isMode2 && (
+                <>
+                  <div className="absolute top-[-50%] right-[-10%] w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+                  <div className="absolute bottom-[-50%] left-[-10%] w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+                </>
+              )}
+              
+              <div className="relative z-10">
+                <h2 className={`text-2xl font-bold mb-6 flex items-center gap-2 ${isMode2 ? 'text-white border-b-2 border-indigo-800 pb-4' : 'text-slate-900'}`}>
+                  <CreditCard className={isMode2 ? 'text-yellow-300' : 'text-gray-500'} /> Ringkasan Pesanan
+                </h2>
+
+                <div className={`space-y-4 mb-6 ${isMode2 ? 'text-indigo-100' : 'text-gray-600'}`}>
+                  {cart.map((item) => (
+                    <div key={item.id} className="flex justify-between items-center text-sm font-medium">
+                      <span className="truncate pr-4 flex-1">
+                        {item.quantity}x {item.name}
+                      </span>
+                      <span className={`whitespace-nowrap font-bold ${isMode2 ? 'text-white' : 'text-slate-800'}`}>
+                        {formatPrice(item.price * item.quantity)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={`pt-6 mb-8 space-y-3 ${isMode2 ? 'border-t-2 border-dashed border-indigo-800' : 'border-t-2 border-slate-200'}`}>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className={isMode2 ? 'text-indigo-200 font-bold' : 'font-semibold text-gray-700'}>Subtotal Item</span>
+                    <span className={`font-bold ${isMode2 ? 'text-white' : 'text-gray-800'}`}>{formatPrice(cartTotal)}</span>
+                  </div>
+                  {isMode2 && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-indigo-200 font-bold">Biaya Pengiriman</span>
+                      <span className="font-bold text-white">{formatPrice(shippingCost)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-3">
+                    <span className={`text-xl ${isMode2 ? 'font-bold text-indigo-200' : 'font-bold text-gray-800'}`}>Total Bayar:</span>
+                    <span className={`text-3xl ${isMode2 ? 'font-black text-[#FCD34D]' : 'font-bold text-blue-600'}`}>
+                      {formatPrice(finalTotal)}
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleSubmit}
+                  variant="success"
+                  size="xl"
+                  className={`w-full ${isMode2 ? 'bg-[#FCD34D] text-[#78350F] hover:bg-[#FBBF24] font-black rounded-xl shadow-[0_4px_0_0_#D97706] hover:translate-y-1 hover:shadow-none transition-all' : ''}`}
+                  disabled={loading}
+                  aria-label="Bayar sekarang"
+                >
+                  {loading ? 'Memproses...' : (isMode2 ? 'Pay Securely Now' : 'Bayar Sekarang')}
+                </Button>
+                
+                {isMode2 && (
+                  <p className="text-center text-indigo-300 text-xs mt-4 font-medium flex items-center justify-center gap-1">
+                    <ShieldCheck size={14} /> Pembayaran aman dienkripsi oleh Midtrans
+                  </p>
+                )}
               </div>
             </div>
           </aside>
@@ -281,14 +411,13 @@ export const Checkout = () => {
         <div className="container mx-auto px-4 py-3">
           <Button
             type="button"
-            onClick={handlePlaceOrder}
+            onClick={handleSubmit}
             variant="success"
             size="lg"
-            className="w-full"
+            className={`w-full ${isMode2 ? 'bg-[#10B981] font-bold rounded-xl' : ''}`}
             disabled={loading}
-            aria-label={`Bayar sekarang total ${formatPrice(cartTotal)}`}
           >
-            {loading ? 'Memproses...' : `Bayar ${formatPrice(cartTotal)}`}
+            {loading ? 'Memproses...' : `Bayar ${formatPrice(finalTotal)}`}
           </Button>
         </div>
       </div>
