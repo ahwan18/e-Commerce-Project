@@ -18,6 +18,27 @@ import { useAuth } from '../../context/AuthContext';
 import { formatPrice, validatePhone } from '../../utils/helpers';
 import * as OrderController from '../../controllers/orderController';
 
+const SULSEL_CITIES = [
+  { name: 'Kab. Sidenreng Rappang (Sidrap)', distance: 5 },
+  { name: 'Kota Parepare', distance: 30 },
+  { name: 'Kab. Pinrang', distance: 45 },
+  { name: 'Kab. Wajo', distance: 55 },
+  { name: 'Kab. Enrekang', distance: 65 },
+  { name: 'Kab. Soppeng', distance: 75 },
+  { name: 'Kab. Barru', distance: 85 },
+  { name: 'Kab. Bone', distance: 110 },
+  { name: 'Kab. Tana Toraja', distance: 120 },
+  { name: 'Kab. Pangkep', distance: 140 },
+  { name: 'Kab. Luwu', distance: 150 },
+  { name: 'Kota Palopo', distance: 170 },
+  { name: 'Kab. Maros', distance: 180 },
+  { name: 'Kota Makassar', distance: 200 },
+  { name: 'Kab. Gowa', distance: 210 },
+  { name: 'Kab. Takalar', distance: 230 },
+  { name: 'Kab. Bantaeng', distance: 270 },
+  { name: 'Kab. Bulukumba', distance: 290 },
+].sort((a, b) => a.name.localeCompare(b.name));
+
 export const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, clearCart } = useCart();
@@ -53,10 +74,19 @@ export const Checkout = () => {
   }, [isMode2, user]);
 
   useEffect(() => {
-    if (shippingMethod === 'regular') setShippingCost(isMode2 ? 15000 : 0);
-    else if (shippingMethod === 'express') setShippingCost(35000);
-    else setShippingCost(0);
-  }, [shippingMethod, isMode2]);
+    if (isMode2 && formData.city) {
+      const selectedCity = SULSEL_CITIES.find(c => c.name === formData.city);
+      if (selectedCity) {
+        // Rp 10.000 per 5km from Sidrap
+        const cost = Math.max(1, Math.ceil(selectedCity.distance / 5)) * 10000;
+        setShippingCost(cost);
+      } else {
+        setShippingCost(0);
+      }
+    } else {
+      setShippingCost(0);
+    }
+  }, [formData.city, isMode2]);
 
   const finalTotal = cartTotal + (isMode2 ? shippingCost : 0);
 
@@ -275,16 +305,19 @@ export const Checkout = () => {
                   </div>
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2">Kota/Kabupaten</label>
-                      <input
-                        type="text"
+                      <label className="block text-sm font-bold text-slate-700 mb-2">Kota/Kabupaten (Sulsel)</label>
+                      <select
                         name="city"
                         value={formData.city}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:ring-0 focus:border-pink-500 transition-colors outline-none font-medium"
-                        placeholder="Contoh: Jakarta Selatan"
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:ring-0 focus:border-pink-500 transition-colors outline-none font-medium text-slate-700"
                         required
-                      />
+                      >
+                        <option value="" disabled>Pilih Kota/Kabupaten</option>
+                        {SULSEL_CITIES.map(city => (
+                          <option key={city.name} value={city.name}>{city.name}</option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2">Kode Pos</label>
@@ -308,32 +341,31 @@ export const Checkout = () => {
                 <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                   <Truck className="text-emerald-500" /> Metode Pengiriman
                 </h2>
-                <div className="space-y-4">
-                  <label className={`block p-4 rounded-xl border-2 cursor-pointer transition-all ${shippingMethod === 'regular' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <input type="radio" name="shipping" value="regular" checked={shippingMethod === 'regular'} onChange={() => setShippingMethod('regular')} className="w-5 h-5 text-emerald-600 focus:ring-emerald-500" />
-                        <div>
-                          <p className="font-bold text-slate-900">Reguler (2-3 Hari)</p>
-                          <p className="text-sm text-slate-500 font-medium">JNE, SiCepat, AnterAja</p>
+                {formData.city ? (
+                  <div className="space-y-4">
+                    <label className="block p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 transition-all cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-5 h-5 rounded-full border-4 border-emerald-600 bg-white shadow-sm flex-shrink-0"></div>
+                          <div>
+                            <p className="font-bold text-slate-900">Kurir Toko / Ekspedisi</p>
+                            <p className="text-sm text-slate-600 font-medium mt-1">
+                              Tujuan: {formData.city} (Estimasi: {SULSEL_CITIES.find(c => c.name === formData.city)?.distance} km)
+                            </p>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Tarif: Rp 10.000 per 5 km dari Jl. Dongi, Sidrap.
+                            </p>
+                          </div>
                         </div>
+                        <span className="font-black text-slate-900 ml-4">{formatPrice(shippingCost)}</span>
                       </div>
-                      <span className="font-black text-slate-900">Rp 15.000</span>
-                    </div>
-                  </label>
-                  <label className={`block p-4 rounded-xl border-2 cursor-pointer transition-all ${shippingMethod === 'express' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <input type="radio" name="shipping" value="express" checked={shippingMethod === 'express'} onChange={() => setShippingMethod('express')} className="w-5 h-5 text-emerald-600 focus:ring-emerald-500" />
-                        <div>
-                          <p className="font-bold text-slate-900">Express (Besok Sampai)</p>
-                          <p className="text-sm text-slate-500 font-medium">Grab, Gojek, Paxel</p>
-                        </div>
-                      </div>
-                      <span className="font-black text-slate-900">Rp 35.000</span>
-                    </div>
-                  </label>
-                </div>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="p-6 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 text-center">
+                    <p className="text-slate-500 font-medium text-sm">Silakan pilih Kota/Kabupaten pada alamat pengiriman terlebih dahulu untuk melihat tarif pengiriman.</p>
+                  </div>
+                )}
               </div>
             )}
             
