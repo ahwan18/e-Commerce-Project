@@ -106,7 +106,7 @@ export const Account = () => {
                   <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
                     <MapPin size={20} className="text-emerald-500" /> Address Book
                   </h2>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md">Coming Soon</span
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md">Coming Soon</span>
                 </div>
                 <p className="text-sm text-slate-500 font-medium">Save your shipping addresses here for faster checkout in the future.</p>
               </div>
