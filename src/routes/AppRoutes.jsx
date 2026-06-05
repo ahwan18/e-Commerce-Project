@@ -49,7 +49,7 @@ export const AppRoutes = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={uiMode === 'mode2' ? <Mode2Landing /> : <Navigate to="/menu" replace />} />
+        <Route path="/" element={uiMode === 'mode2' ? <><Navbar /><Mode2Landing /></> : <Navigate to="/menu" replace />} />
 
         {/* =========================================
             MODE 1: COUNTER / QR FLOW ROUTES 
