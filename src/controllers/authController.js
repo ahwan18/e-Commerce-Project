@@ -61,6 +61,27 @@ export const register = async (email, password) => {
 };
 
 /**
+ * Login or Register with Google OAuth
+ * @returns {Promise<Object>}
+ */
+export const loginWithGoogle = async () => {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/catalog'
+      }
+    });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Google OAuth error:', error);
+    throw error;
+  }
+};
+
+/**
  * Logout current user
  * @returns {Promise<void>}
  */

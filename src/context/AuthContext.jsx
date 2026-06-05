@@ -73,8 +73,6 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const data = await AuthController.register(email, password);
-      // Depending on Supabase configuration (e.g. requires email confirmation),
-      // the session might be null.
       if (data.session) {
         setSession(data.session);
         setUser(data.user);
@@ -82,6 +80,20 @@ export const AuthProvider = ({ children }) => {
       return { success: true, message: data.session ? null : 'Check your email for confirmation link' };
     } catch (error) {
       console.error('Sign up error:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      await AuthController.loginWithGoogle();
+      // We don't await the session here because OAuth redirects the browser
+      return { success: true };
+    } catch (error) {
+      console.error('Google sign in error:', error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
@@ -109,6 +121,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
     isAuthenticated: !!user,
   };
