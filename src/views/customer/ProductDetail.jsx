@@ -9,10 +9,9 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Minus, Plus, Maximize2 } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Minus, Plus } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Loading } from '../../components/Loading';
-import { QRCodeDisplay } from '../../components/QRCodeDisplay';
 import { useCart } from '../../context/CartContext';
 import { formatPrice } from '../../utils/helpers';
 import * as ProductController from '../../controllers/productController';
@@ -26,7 +25,6 @@ export const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showQRModal, setShowQRModal] = useState(false);
 
   useEffect(() => {
     loadProduct();
@@ -99,7 +97,7 @@ export const ProductDetail = () => {
     <main className="page-shell">
       <div className="page-container pb-24">
         <Button
-          onClick={() => navigate('/shop')}
+          onClick={() => navigate(-1)}
           variant="secondary"
           size="sm"
           className="mb-6 flex items-center gap-2"
@@ -126,17 +124,6 @@ export const ProductDetail = () => {
                   </div>
                 )}
               </div>
-
-              <button
-                onClick={() => setShowQRModal(true)}
-                className="w-full bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 hover:border-green-300 rounded-2xl p-4 transition-all text-center group min-h-11"
-                aria-label="Lihat QR code produk"
-              >
-                <Maximize2 size={20} className="mx-auto mb-2 text-green-600 group-hover:text-green-700 transition-colors" />
-                <p className="text-sm font-semibold text-green-700 group-hover:text-green-800">
-                  Lihat QR Code
-                </p>
-              </button>
             </div>
 
             <div className="flex flex-col justify-between">
@@ -210,45 +197,6 @@ export const ProductDetail = () => {
           </div>
         </article>
       </div>
-
-      {showQRModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="surface-card max-w-md w-full p-6 sm:p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-slate-900">
-                Bagikan Produk
-              </h2>
-              <button
-                onClick={() => setShowQRModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-2xl min-h-11 min-w-11"
-                aria-label="Tutup modal QR"
-              >
-                ×
-              </button>
-            </div>
-
-            <p className="text-gray-600 text-sm mb-6">
-              Scan QR code untuk membagikan produk ini:
-            </p>
-
-            <QRCodeDisplay
-              value={`${window.location.origin}/shop/product/${product.id}`}
-              label={`Scan to view: ${product.name}`}
-              fileName={`qr-${product.name.replace(/\s+/g, '-')}.svg`}
-            />
-
-            <Button
-              onClick={() => setShowQRModal(false)}
-              variant="secondary"
-              size="lg"
-              className="w-full mt-6"
-              aria-label="Tutup"
-            >
-              Tutup
-            </Button>
-          </div>
-        </div>
-      )}
     </main>
   );
 };
