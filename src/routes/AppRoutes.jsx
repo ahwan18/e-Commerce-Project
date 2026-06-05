@@ -8,17 +8,27 @@
  */
 
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSettings } from '../context/SettingsContext';
+
 import { Navbar } from '../components/Navbar';
 import { CounterGate } from '../components/CounterGate';
 import { AdminLayout } from '../components/admin/AdminLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 
+// Mode 1 (Counter) Views
 import { Catalog } from '../views/customer/Catalog';
 import { ProductDetail } from '../views/customer/ProductDetail';
 import { Cart } from '../views/customer/Cart';
 import { Checkout } from '../views/customer/Checkout';
 import { OrderTracking } from '../views/customer/OrderTracking';
 
+// Mode 2 (Standard E-commerce) Views
+import { LandingPage as Mode2Landing } from '../views/customer/mode2/LandingPage';
+import { Catalog as Mode2Catalog } from '../views/customer/mode2/Catalog';
+import { CustomerLogin as Mode2Login } from '../views/customer/mode2/CustomerLogin';
+import { CustomerProtectedRoute } from './CustomerProtectedRoute';
+
+// Admin Views
 import { Login } from '../views/admin/Login';
 import { Dashboard } from '../views/admin/Dashboard';
 import { ManageProducts } from '../views/admin/ManageProducts';
@@ -28,79 +38,131 @@ import { ManageCounters } from '../views/admin/ManageCounters';
 import { Settings } from '../views/admin/Settings';
 
 export const AppRoutes = () => {
+  const { uiMode, isLoading } = useSettings();
+
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Loading Application...</div>;
+  }
+
   return (
     <>
       <Routes>
-        <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route path="/" element={uiMode === 'mode2' ? <Mode2Landing /> : <Navigate to="/menu" replace />} />
 
-        <Route
-          path="/menu"
-          element={
-            <CounterGate>
-              <>
-                <Navbar />
-                <Catalog />
-              </>
-            </CounterGate>
-          }
-        />
-        <Route
-          path="/shop/product/:id"
-          element={
-            <CounterGate>
-              <>
-                <Navbar />
-                <ProductDetail />
-              </>
-            </CounterGate>
-          }
-        />
-        <Route
-          path="/shop/cart"
-          element={
-            <CounterGate>
-              <>
-                <Navbar />
-                <Cart />
-              </>
-            </CounterGate>
-          }
-        />
-        <Route
-          path="/shop/checkout"
-          element={
-            <CounterGate>
-              <>
-                <Navbar />
-                <Checkout />
-              </>
-            </CounterGate>
-          }
-        />
-        <Route
-          path="/shop/track/:orderId"
-          element={
-            <CounterGate>
-              <>
-                <Navbar />
-                <OrderTracking />
-              </>
-            </CounterGate>
-          }
-        />
-        <Route
-          path="/shop/track"
-          element={
-            <CounterGate>
-              <>
-                <Navbar />
-                <OrderTracking />
-              </>
-            </CounterGate>
-          }
-        />
-        <Route path="/shop" element={<Navigate to="/menu" replace />} />
+        {/* =========================================
+            MODE 1: COUNTER / QR FLOW ROUTES 
+            ========================================= */}
+        {uiMode === 'mode1' && (
+          <>
+            <Route
+              path="/menu"
+              element={
+                <CounterGate>
+                  <>
+                    <Navbar />
+                    <Catalog />
+                  </>
+                </CounterGate>
+              }
+            />
+            <Route
+              path="/shop/product/:id"
+              element={
+                <CounterGate>
+                  <>
+                    <Navbar />
+                    <ProductDetail />
+                  </>
+                </CounterGate>
+              }
+            />
+            <Route
+              path="/shop/cart"
+              element={
+                <CounterGate>
+                  <>
+                    <Navbar />
+                    <Cart />
+                  </>
+                </CounterGate>
+              }
+            />
+            <Route
+              path="/shop/checkout"
+              element={
+                <CounterGate>
+                  <>
+                    <Navbar />
+                    <Checkout />
+                  </>
+                </CounterGate>
+              }
+            />
+            <Route
+              path="/shop/track/:orderId"
+              element={
+                <CounterGate>
+                  <>
+                    <Navbar />
+                    <OrderTracking />
+                  </>
+                </CounterGate>
+              }
+            />
+            <Route
+              path="/shop/track"
+              element={
+                <CounterGate>
+                  <>
+                    <Navbar />
+                    <OrderTracking />
+                  </>
+                </CounterGate>
+              }
+            />
+            <Route path="/shop" element={<Navigate to="/menu" replace />} />
+          </>
+        )}
 
+        {/* =========================================
+            MODE 2: STANDARD E-COMMERCE ROUTES 
+            ========================================= */}
+        {uiMode === 'mode2' && (
+          <>
+            <Route path="/catalog" element={<><Navbar /><Mode2Catalog /></>} />
+            <Route path="/shop/product/:id" element={<><Navbar /><ProductDetail /></>} />
+            <Route path="/login" element={<Mode2Login />} />
+            
+            {/* Customer Protected Routes */}
+            <Route path="/shop/cart" element={
+              <CustomerProtectedRoute>
+                <Navbar /><Cart />
+              </CustomerProtectedRoute>
+            } />
+            <Route path="/shop/checkout" element={
+              <CustomerProtectedRoute>
+                <Navbar /><Checkout />
+              </CustomerProtectedRoute>
+            } />
+            <Route path="/shop/track/:orderId" element={
+              <CustomerProtectedRoute>
+                <Navbar /><OrderTracking />
+              </CustomerProtectedRoute>
+            } />
+            <Route path="/shop/track" element={
+              <CustomerProtectedRoute>
+                <Navbar /><OrderTracking />
+              </CustomerProtectedRoute>
+            } />
+            
+            <Route path="/menu" element={<Navigate to="/catalog" replace />} />
+            <Route path="/shop" element={<Navigate to="/catalog" replace />} />
+          </>
+        )}
+
+        {/* =========================================
+            ADMIN ROUTES (Always available)
+            ========================================= */}
         <Route path="/admin/login" element={<Login />} />
 
         <Route
@@ -164,7 +226,7 @@ export const AppRoutes = () => {
           }
         />
 
-        <Route path="*" element={<Navigate to="/menu" replace />} />
+        <Route path="*" element={<Navigate to={uiMode === 'mode2' ? "/" : "/menu"} replace />} />
       </Routes>
     </>
   );
