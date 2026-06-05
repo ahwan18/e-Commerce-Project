@@ -237,6 +237,12 @@ export const Catalog = () => {
                       <span className="bg-slate-800 text-white font-bold px-4 py-2 rounded-full rotate-12 shadow-lg">Out of Stock</span>
                     </div>
                   )}
+                  {/* Quick View Overlay */}
+                  <div className="absolute inset-0 bg-indigo-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                    <div className="bg-white text-indigo-600 rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform shadow-lg pointer-events-auto">
+                       <Search size={20} />
+                    </div>
+                  </div>
                 </div>
                 <div className="flex-grow flex flex-col justify-between px-2">
                   <div>
@@ -249,17 +255,31 @@ export const Catalog = () => {
                       {product.name}
                     </h3>
                   </div>
-                  <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center justify-between mb-4">
                     <span className="text-2xl font-black text-[#4F46E5]">
                       {formatPrice(product.price)}
                     </span>
+                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-md font-bold">Stock {product.stock}</span>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/shop/product/${product.id}`);
+                      }}
+                      className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-3 rounded-xl transition-colors text-sm border-2 border-slate-100"
+                    >
+                      Details
+                    </button>
                     <button 
                       onClick={(e) => handleAddToCart(e, product)}
                       disabled={product.stock <= 0}
-                      className="bg-[#10B981] hover:bg-[#059669] text-white p-3 rounded-xl transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110 active:scale-95"
+                      className="flex-[2] bg-[#10B981] hover:bg-[#059669] text-white font-bold py-3 px-2 rounded-xl transition-all shadow-[0_4px_0_0_#047857] hover:shadow-none hover:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       aria-label="Add to cart"
                     >
                       <ShoppingBag className="w-5 h-5" />
+                      <span>{product.stock <= 0 ? 'Empty' : 'Add'}</span>
                     </button>
                   </div>
                 </div>

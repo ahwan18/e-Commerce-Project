@@ -13,6 +13,7 @@ import { ArrowLeft, ShoppingCart, Minus, Plus } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Loading } from '../../components/Loading';
 import { useCart } from '../../context/CartContext';
+import { useSettings } from '../../context/SettingsContext';
 import { formatPrice } from '../../utils/helpers';
 import * as ProductController from '../../controllers/productController';
 
@@ -20,6 +21,9 @@ export const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { uiMode } = useSettings();
+
+  const isMode2 = uiMode === 'mode2';
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -73,18 +77,18 @@ export const ProductDetail = () => {
 
   if (error || !product) {
     return (
-      <main className="page-shell">
+      <main className={`page-shell ${isMode2 ? 'bg-[#FDF8F5]' : ''}`}>
         <div className="page-container">
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl" role="alert">
             {error || 'Produk tidak ditemukan'}
           </div>
           <Button
-            onClick={() => navigate('/shop')}
-            variant="secondary"
+            onClick={() => navigate(isMode2 ? '/catalog' : '/shop')}
+            variant={isMode2 ? "primary" : "secondary"}
             className="mt-4"
             aria-label="Kembali ke katalog"
           >
-            Kembali ke Katalog
+            {isMode2 ? 'Back to Catalog' : 'Kembali ke Katalog'}
           </Button>
         </div>
       </main>
@@ -94,17 +98,17 @@ export const ProductDetail = () => {
   const isOutOfStock = product.stock === 0;
 
   return (
-    <main className="page-shell">
+    <main className={`page-shell ${isMode2 ? 'bg-[#FDF8F5]' : ''}`}>
       <div className="page-container pb-24">
         <Button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(isMode2 ? '/catalog' : '/menu')}
           variant="secondary"
           size="sm"
-          className="mb-6 flex items-center gap-2"
+          className={`mb-6 flex items-center gap-2 ${isMode2 ? 'bg-white border-2 border-slate-100 hover:border-slate-200 shadow-sm text-slate-700 font-bold' : ''}`}
           aria-label="Kembali ke katalog"
         >
           <ArrowLeft size={18} />
-          Kembali
+          {isMode2 ? 'Back to Catalog' : 'Kembali'}
         </Button>
 
         <article className="surface-card overflow-hidden">
