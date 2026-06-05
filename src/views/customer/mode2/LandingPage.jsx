@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowRight, Star, Sparkles, Rocket } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Navbar } from '../../../components/Navbar';
 import * as ProductController from '../../../controllers/productController';
 import { formatPrice } from '../../../utils/helpers';
 
@@ -32,7 +33,8 @@ export const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] flex flex-col font-sans selection:bg-pink-300 selection:text-pink-900">
-      
+      <Navbar variant="fun" />
+
       {/* Playful Hero Section */}
       <header className="relative bg-[#4F46E5] text-white overflow-hidden rounded-b-[3rem] shadow-2xl z-10 mb-12">
         {/* Abstract Background Shapes */}

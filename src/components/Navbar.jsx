@@ -14,7 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { Button } from './Button';
 
-export const Navbar = () => {
+export const Navbar = ({ variant = 'default' }) => {
   const { cartCount } = useCart();
   const { isAuthenticated, signOut } = useAuth();
   const { uiMode } = useSettings();
@@ -31,16 +31,23 @@ export const Navbar = () => {
   const homeLink = isAdminRoute ? '/admin' : (uiMode === 'mode2' ? '/' : '/menu');
 
   return (
-    <nav className={uiMode === 'mode2' ? "bg-white shadow-sm sticky top-0 z-50 border-b border-slate-100" : "bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm sticky top-0 z-50"} aria-label="Navigasi utama">
-      <div className="container mx-auto px-4">
+    <nav className={`
+      ${variant === 'fun'
+        ? "bg-white shadow-lg sticky top-0 z-50 border-b-4 border-yellow-400 rounded-b-3xl transition-all"
+        : uiMode === 'mode2'
+          ? "bg-white shadow-sm sticky top-0 z-50 border-b border-slate-100"
+          : "bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm sticky top-0 z-50"}
+      ${variant === 'fun' ? 'px-4 py-2' : ''}
+    `} aria-label="Navigasi utama">
+      <div className={`container mx-auto ${variant === 'fun' ? 'px-2' : 'px-4'}`}>
         <div className="flex items-center justify-between h-16">
           <Link
             to={homeLink}
             className={`flex items-center gap-2 ${uiMode === 'mode2' && !isAdminRoute ? 'text-indigo-900' : 'text-white'}`}
           >
-            <Store size={32} className={uiMode === 'mode2' && !isAdminRoute ? 'text-indigo-600' : ''} />
-            <div>
-              <h1 className="text-2xl font-bold">Toko Mainan</h1>
+            <Store size={32} className={`${uiMode === 'mode2' && !isAdminRoute ? 'text-indigo-600' : ''} ${variant === 'fun' ? 'animate-bounce' : ''}`} />
+            <div className={variant === 'fun' ? 'scale-110' : ''}>
+              <h1 className={`text-2xl font-bold ${variant === 'fun' ? 'text-indigo-600' : ''}`}>Toko Mainan</h1>
               {uiMode === 'mode1' && <p className="text-xs text-blue-100">Jalan Dongi</p>}
             </div>
           </Link>
@@ -77,13 +84,22 @@ export const Navbar = () => {
                 {uiMode === 'mode2' && (
                   <>
                     {isAuthenticated ? (
-                      <button
-                        onClick={handleLogout}
-                        className="text-slate-600 hover:text-indigo-600 font-medium text-sm transition-colors flex items-center gap-1 mr-2"
-                      >
-                        <LogOut size={18} />
-                        <span className="hidden sm:inline">Logout</span>
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          to="/account"
+                          className="text-slate-600 hover:text-indigo-600 font-medium text-sm transition-colors flex items-center gap-1 mr-2"
+                        >
+                          <User size={18} />
+                          <span className="hidden sm:inline">My Account</span>
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="text-slate-600 hover:text-indigo-600 font-medium text-sm transition-colors flex items-center gap-1"
+                        >
+                          <LogOut size={18} />
+                          <span className="hidden sm:inline">Logout</span>
+                        </button>
+                      </div>
                     ) : (
                       <Link
                         to="/login"
