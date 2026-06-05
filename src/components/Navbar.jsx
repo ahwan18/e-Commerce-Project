@@ -9,6 +9,7 @@
 
 import { ShoppingCart, Store, LogOut, LayoutDashboard, User } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
@@ -21,7 +22,29 @@ export const Navbar = ({ variant = 'default' }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   const isAdminRoute = location.pathname.startsWith('/admin');
+
+  useEffect(() => {
+    if (uiMode !== 'mode2') return;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Hide if scrolling down and past 100px. Show if scrolling up.
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, uiMode]);
 
   const handleLogout = async () => {
     await signOut();
@@ -31,7 +54,7 @@ export const Navbar = ({ variant = 'default' }) => {
   const homeLink = isAdminRoute ? '/admin' : (uiMode === 'mode2' ? '/' : '/menu');
 
   return (
-    <div className={uiMode === 'mode2' ? 'fixed top-4 left-0 right-0 z-50 px-4 pointer-events-none' : 'sticky top-0 z-50'}>
+    <div className={uiMode === 'mode2' ? `fixed top-4 left-0 right-0 z-50 px-4 pointer-events-none transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-[150%]'}` : 'sticky top-0 z-50'}>
       <nav className={`
         ${uiMode === 'mode2'
           ? "bg-white/80 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-200/50 rounded-full max-w-5xl mx-auto pointer-events-auto transition-all"

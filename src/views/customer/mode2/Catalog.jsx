@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Filter, ShoppingBag } from 'lucide-react';
+import { Search, Filter, ShoppingBag, ArrowLeft } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useCart } from '../../../context/CartContext';
 import { formatPrice } from '../../../utils/helpers';
 import * as ProductController from '../../../controllers/productController';
+import { Button } from '../../../components/Button';
 
 export const Catalog = () => {
   const navigate = useNavigate();
@@ -140,6 +141,19 @@ export const Catalog = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 pb-32">
         
+        <div className="mb-6 flex">
+          <Button
+            onClick={() => navigate('/')}
+            variant="secondary"
+            size="sm"
+            className="flex items-center gap-2 bg-white shadow-sm border-2 border-slate-100 hover:border-slate-200"
+            aria-label="Kembali ke beranda"
+          >
+            <ArrowLeft size={18} />
+            Back to Home
+          </Button>
+        </div>
+
         {/* Search & Filter Bar */}
         <div className="bg-white rounded-[2rem] p-4 sm:p-6 shadow-xl border-2 border-slate-100 mb-10 flex flex-col md:flex-row gap-4">
           <div className="flex-grow relative">
