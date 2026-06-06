@@ -39,26 +39,20 @@ export const OrderTracking = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('[OrderTracking] Loading order:', id);
       const orderData = await TrackingController.getOrderTracking(id);
-      console.log('[OrderTracking] Order loaded:', orderData);
       setOrder(orderData);
     } catch (err) {
-      console.error('[OrderTracking] Error loading order:', err);
       setError(err.message);
       setOrder(null);
     } finally {
-      console.log('[OrderTracking] Loading finished, setting loading to false');
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    console.log('[OrderTracking] Component mounted with orderId:', orderId);
     if (orderId) {
       loadOrder(orderId);
     } else {
-      console.log('[OrderTracking] No orderId provided, setting loading to false');
       setLoading(false);
     }
   }, [orderId, loadOrder]);
@@ -76,27 +70,15 @@ export const OrderTracking = () => {
 
     try {
       setCompleting(true);
-      console.log('[OrderTracking] Completing order:', order.id);
       await OrderController.updateStatus(order.id, 'completed');
-      console.log('[OrderTracking] Order status updated to completed');
-
-      // Release session after completing order
       await releaseSession();
-      console.log('[OrderTracking] Session released');
-
-      // Reload order to show updated status
       await loadOrder(order.id);
-      console.log('[OrderTracking] Order reloaded');
-
-      // Stay on tracking page - no redirect to catalog
     } catch (err) {
-      console.error('[OrderTracking] Error completing order:', err);
       setError('Gagal menyelesaikan pesanan: ' + err.message);
     } finally {
       setCompleting(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -114,40 +96,39 @@ export const OrderTracking = () => {
         <div className="max-w-2xl mx-auto">
           {!orderId && (
             <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              Lacak Pesanan
-            </h1>
-            <p className="text-gray-600 mb-6">
-              Masukkan ID pesanan Anda untuk melihat status dan estimasi waktu penyelesaian
-            </p>
-
-            <form onSubmit={handleSearch} className="flex gap-3">
-              <input
-                type="text"
-                value={searchId}
-                onChange={(e) => setSearchId(e.target.value)}
-                placeholder="Masukkan ID pesanan (cth: 550e8400-e29b-41d4-a716-446655440000)"
-                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none"
-              />
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                className="flex items-center gap-2"
-                disabled={loading}
-              >
-                <Search size={18} />
-                {loading ? 'Mencari...' : 'Cari'}
-              </Button>
-            </form>
-
-            {error && (
-              <div className="mt-6 bg-red-100 border-2 border-red-300 text-red-700 px-6 py-4 rounded-xl">
-                <p className="font-semibold">Pesanan tidak ditemukan</p>
-                <p className="text-sm mt-1">{error}</p>
-              </div>
-            )}
-          </div>
+              <h1 className="text-4xl font-bold text-gray-800 mb-2">
+                Lacak Pesanan
+              </h1>
+              <p className="text-gray-600 mb-6">
+                Masukkan ID pesanan Anda untuk melihat status dan estimasi waktu penyelesaian
+              </p>
+              <form onSubmit={handleSearch} className="flex gap-3">
+                <input
+                  type="text"
+                  value={searchId}
+                  onChange={(e) => setSearchId(e.target.value)}
+                  placeholder="Masukkan ID pesanan..."
+                  className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none"
+                />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  className="flex items-center gap-2"
+                  disabled={loading}
+                >
+                  <Search size={18} />
+                  {loading ? 'Mencari...' : 'Cari'}
+                </Button>
+              </form>
+              {error && (
+                <div className="mt-6 bg-red-100 border-2 border-red-300 text-red-700 px-6 py-4 rounded-xl">
+                  <p className="font-semibold">Pesanan tidak ditemukan</p>
+                  <p className="text-sm mt-1">{error}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {loading && !order && (
             <Loading message="Mencari pesanan Anda..." />
