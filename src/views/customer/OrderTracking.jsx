@@ -112,7 +112,8 @@ export const OrderTracking = () => {
         </Button>
 
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
+          {!orderId && (
+            <div className="bg-white rounded-3xl shadow-lg p-8 mb-8">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">
               Lacak Pesanan
             </h1>
@@ -158,7 +159,7 @@ export const OrderTracking = () => {
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                      Pesanan #{order.id.substring(0, 8).toUpperCase()}
+                      Pesanan #{order.order_number || order.id.substring(0, 8).toUpperCase()}
                     </h2>
                     <p className="text-gray-600 text-sm">
                       {new Date(order.created_at).toLocaleDateString('id-ID', {

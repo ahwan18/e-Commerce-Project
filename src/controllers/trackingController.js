@@ -40,36 +40,49 @@ export const getOrderTracking = async (orderId) => {
  * @returns {Array} Status timeline array
  */
 const getStatusTimeline = (status, createdAt, updatedAt) => {
-  const statuses = ['pending', 'paid', 'completed', 'cancelled'];
-  const timeline = [];
-
   const createdDate = new Date(createdAt);
   const updatedDate = new Date(updatedAt);
 
-  for (let i = 0; i < statuses.length; i++) {
-    const currentStatus = statuses[i];
-    let completed = false;
-    let date = null;
+  // Define the "Success Path"
+  const successPath = [
+    { id: 'pending', label: 'Pending', desc: 'Your order has been placed and is awaiting payment.' },
+    { id: 'paid', label: 'Paid', desc: 'Payment confirmed! We are now processing your toys.' },
+    { id: 'completed', label: 'Completed', desc: 'Your adventure is ready! Please collect your order.' },
+  ];
 
-    if (status === 'cancelled') {
-      completed = currentStatus === 'pending';
-      date = completed ? createdDate : null;
-    } else {
-      const statusIndex = statuses.indexOf(status);
-      completed = i <= statusIndex;
+  const timeline = [];
 
-      if (i === 0) {
-        date = createdDate;
-      } else if (i === statusIndex) {
-        date = updatedDate;
-      }
-    }
-
+  if (status === 'cancelled') {
+    // Cancelled Path: Pending -> Cancelled
     timeline.push({
-      status: currentStatus,
-      label: getStatusLabel(currentStatus),
-      completed,
-      date,
+      status: 'pending',
+      label: 'Pending',
+      completed: true,
+      date: createdDate,
+    });
+    timeline.push({
+      status: 'cancelled',
+      label: 'Cancelled',
+      completed: true,
+      date: updatedDate,
+    });
+  } else {
+    // Success Path: Only show steps up to current status
+    const statusIndex = successPath.findIndex(s => s.id === status);
+
+    successPath.forEach((step, i) => {
+      const isCompleted = i <= statusIndex;
+      let date = null;
+
+      if (i === 0) date = createdDate;
+      else if (i === statusIndex) date = updatedDate;
+
+      timeline.push({
+        status: step.id,
+        label: step.label,
+        completed: isCompleted,
+        date: date,
+      });
     });
   }
 
