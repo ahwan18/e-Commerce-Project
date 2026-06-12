@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Filter, ShoppingBag, ArrowLeft } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { useAuth } from '../../../context/AuthContext';
 import { useCart } from '../../../context/CartContext';
 import { formatPrice } from '../../../utils/helpers';
 import * as ProductController from '../../../controllers/productController';
@@ -10,7 +11,9 @@ import { Button } from '../../../components/Button';
 
 export const Catalog = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const { addItem, cartCount, cartTotal } = useCart();
 
   const initialCategory = searchParams.get('category') || 'all';
@@ -111,6 +114,12 @@ export const Catalog = () => {
   const handleAddToCart = (e, product) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
     const success = addItem(product, 1);
     if (success) {
       showNotification(`${product.name} added!`);

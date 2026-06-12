@@ -10,7 +10,9 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import * as CartController from '../controllers/cartController';
+import { useAuth } from './AuthContext';
 import { useCounter } from './CounterContext';
+import { useSettings } from './SettingsContext';
 
 const CartContext = createContext();
 
@@ -24,26 +26,45 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const { counterId, sessionId } = useCounter();
+  const { user } = useAuth();
+  const { uiMode } = useSettings();
   const [cart, setCart] = useState([]);
   const [cartCount, setCartCount] = useState(0);
   const [cartTotal, setCartTotal] = useState(0);
-  const cartScopeKey =
-    counterId && sessionId ? `toy_store_cart_${counterId}_${sessionId}` : null;
+  const cartScopeKey = (() => {
+    if (uiMode === 'mode2') {
+      return user?.id ? `toy_store_cart_user_${user.id}` : null;
+    }
+
+    return counterId && sessionId ? `toy_store_cart_${counterId}_${sessionId}` : null;
+  })();
+  const canUseCart = Boolean(cartScopeKey);
 
   useEffect(() => {
     loadCart();
-  }, [cartScopeKey]);
+  }, [cartScopeKey, canUseCart]);
 
   useEffect(() => {
     updateCartStats();
   }, [cart]);
 
   const loadCart = () => {
+    if (!canUseCart) {
+      setCart([]);
+      return;
+    }
+
     const cartData = CartController.getCart(cartScopeKey);
     setCart(cartData);
   };
 
   const updateCartStats = () => {
+    if (!canUseCart) {
+      setCartCount(0);
+      setCartTotal(0);
+      return;
+    }
+
     const count = CartController.getCartItemCount(cartScopeKey);
     const total = CartController.calculateCartTotal(cartScopeKey);
     setCartCount(count);
@@ -52,6 +73,10 @@ export const CartProvider = ({ children }) => {
 
   const addItem = (product, quantity = 1) => {
     try {
+      if (!canUseCart) {
+        return false;
+      }
+
       const updatedCart = CartController.addToCart(product, quantity, cartScopeKey);
       setCart(updatedCart);
       return true;
@@ -63,6 +88,10 @@ export const CartProvider = ({ children }) => {
 
   const removeItem = (productId) => {
     try {
+      if (!canUseCart) {
+        return false;
+      }
+
       const updatedCart = CartController.removeFromCart(productId, cartScopeKey);
       setCart(updatedCart);
       return true;
@@ -74,6 +103,10 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = (productId, quantity) => {
     try {
+      if (!canUseCart) {
+        return false;
+      }
+
       const updatedCart = CartController.updateCartItemQuantity(
         productId,
         quantity,
@@ -89,6 +122,11 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     try {
+      if (!canUseCart) {
+        setCart([]);
+        return true;
+      }
+
       const emptyCart = CartController.clearCart(cartScopeKey);
       setCart(emptyCart);
       return true;
@@ -100,6 +138,10 @@ export const CartProvider = ({ children }) => {
 
   const validateCart = (products) => {
     try {
+      if (!canUseCart) {
+        return { valid: true, errors: [], cart: [] };
+      }
+
       const validation = CartController.validateCart(products, cartScopeKey);
       if (!validation.valid) {
         setCart(validation.cart);
@@ -122,6 +164,7 @@ export const CartProvider = ({ children }) => {
     validateCart,
     refreshCart: loadCart,
     cartScopeKey,
+    canUseCart,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -8,10 +8,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, Minus, Plus } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Loading } from '../../components/Loading';
+import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useSettings } from '../../context/SettingsContext';
 import { formatPrice } from '../../utils/helpers';
@@ -20,6 +21,8 @@ import * as ProductController from '../../controllers/productController';
 export const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
   const { addItem } = useCart();
   const { uiMode } = useSettings();
 
@@ -47,6 +50,11 @@ export const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
+    if (isMode2 && !isAuthenticated) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
     const success = addItem(product, quantity);
     if (success) {
       navigate('/shop/cart');
