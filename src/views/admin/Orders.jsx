@@ -67,6 +67,9 @@ export const Orders = () => {
                     Pelanggan
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Pengiriman
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                     Counter
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
@@ -93,7 +96,7 @@ export const Orders = () => {
                 {orders.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="9"
+                      colSpan="10"
                       className="px-6 py-8 text-center text-gray-500"
                     >
                       Belum ada pesanan
@@ -112,6 +115,24 @@ export const Orders = () => {
                         <div className="text-sm text-gray-500">
                           {order.customer_phone}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 min-w-64">
+                        {order.shipping_address ? (
+                          <div>
+                            <div className="text-sm font-semibold text-gray-900">
+                              {order.shipping_city || '-'}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {order.shipping_address}
+                              {order.shipping_postal_code ? `, ${order.shipping_postal_code}` : ''}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {order.shipping_method || '-'} · Ongkir {formatPrice(order.shipping_cost || 0)}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-500">-</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {order.counter?.name || '-'}

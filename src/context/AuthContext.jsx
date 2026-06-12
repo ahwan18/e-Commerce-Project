@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -32,7 +33,9 @@ export const AuthProvider = ({ children }) => {
     const subscription = AuthController.onAuthStateChange(
       async (event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
+        const nextUser = session?.user ?? null;
+        setUser(nextUser);
+        setIsAdmin(await AuthController.isCurrentUserAdmin(nextUser));
         setLoading(false);
       }
     );
@@ -46,7 +49,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const currentSession = await AuthController.getSession();
       setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+      const currentUser = currentSession?.user ?? null;
+      setUser(currentUser);
+      setIsAdmin(await AuthController.isCurrentUserAdmin(currentUser));
     } catch (error) {
       console.error('Error checking user:', error);
     } finally {
@@ -58,9 +63,11 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const data = await AuthController.login(email, password);
+      const nextIsAdmin = await AuthController.isCurrentUserAdmin(data.user);
       setSession(data.session);
       setUser(data.user);
-      return { success: true };
+      setIsAdmin(nextIsAdmin);
+      return { success: true, isAdmin: nextIsAdmin };
     } catch (error) {
       console.error('Sign in error:', error);
       return { success: false, error: error.message };
@@ -76,6 +83,7 @@ export const AuthProvider = ({ children }) => {
       if (data.session) {
         setSession(data.session);
         setUser(data.user);
+        setIsAdmin(await AuthController.isCurrentUserAdmin(data.user));
       }
       return { success: true, message: data.session ? null : 'Check your email for confirmation link' };
     } catch (error) {
@@ -106,6 +114,7 @@ export const AuthProvider = ({ children }) => {
       await AuthController.logout();
       setSession(null);
       setUser(null);
+      setIsAdmin(false);
       return { success: true };
     } catch (error) {
       console.error('Sign out error:', error);
@@ -124,6 +133,7 @@ export const AuthProvider = ({ children }) => {
     signInWithGoogle,
     signOut,
     isAuthenticated: !!user,
+    isAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

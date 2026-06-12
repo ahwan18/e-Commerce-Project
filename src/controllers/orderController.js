@@ -75,6 +75,11 @@ export const createOrder = async (orderData) => {
       session_id: orderData.session_id,
       user_id: user?.id || null, // Link to user if logged in, else null (Guest)
       order_number: orderNumber,
+      shipping_address: orderData.shipping_address || null,
+      shipping_city: orderData.shipping_city || null,
+      shipping_postal_code: orderData.shipping_postal_code || null,
+      shipping_method: orderData.shipping_method || null,
+      shipping_cost: orderData.shipping_cost || 0,
     });
     debugLog('Order created:', order);
 

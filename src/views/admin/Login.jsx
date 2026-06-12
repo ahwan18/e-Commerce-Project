@@ -15,7 +15,7 @@ import { useAuth } from '../../context/AuthContext';
 
 export const Login = () => {
   const navigate = useNavigate();
-  const { signIn, isAuthenticated, loading: authLoading } = useAuth();
+  const { signIn, signOut, isAuthenticated, isAdmin, loading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -25,10 +25,10 @@ export const Login = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
+    if (isAuthenticated && isAdmin && !authLoading) {
       navigate('/admin');
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [isAuthenticated, isAdmin, authLoading, navigate]);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -52,8 +52,11 @@ export const Login = () => {
 
       const result = await signIn(formData.email, formData.password);
 
-      if (result.success) {
+      if (result.success && result.isAdmin) {
         navigate('/admin');
+      } else if (result.success) {
+        await signOut();
+        setError('Akun ini tidak memiliki akses admin');
       } else {
         setError(result.error || 'Login gagal');
       }

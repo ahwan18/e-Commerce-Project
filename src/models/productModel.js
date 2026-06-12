@@ -238,8 +238,8 @@ export const deleteProduct = async (id) => {
  */
 export const updateProductStock = async (id, quantity) => {
   const { data, error } = await supabase.rpc('update_product_stock', {
-    product_id: id,
-    quantity_change: quantity,
+    p_product_id: id,
+    p_quantity_change: quantity,
   });
 
   if (error) {

@@ -10,6 +10,12 @@
 
 import { supabase } from '../services/supabaseClient';
 
+const getConfiguredAdminEmails = () =>
+  (import.meta.env.VITE_ADMIN_EMAILS || '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
 /**
  * Login with email and password (Admin only)
  * @param {string} email - User email
@@ -108,6 +114,34 @@ export const getCurrentUser = async () => {
   } catch (error) {
     console.error('Error getting current user:', error);
     return null;
+  }
+};
+
+/**
+ * Check whether the current authenticated user is allowed to access admin features.
+ * Uses the database role function when available, with an env email allowlist fallback
+ * for local MVP demos before migrations are applied.
+ *
+ * @param {Object|null} user - Supabase auth user
+ * @returns {Promise<boolean>} True when the user is an admin
+ */
+export const isCurrentUserAdmin = async (user) => {
+  if (!user?.email) {
+    return false;
+  }
+
+  const configuredAdminEmails = getConfiguredAdminEmails();
+  if (configuredAdminEmails.includes(user.email.toLowerCase())) {
+    return true;
+  }
+
+  try {
+    const { data, error } = await supabase.rpc('is_admin');
+    if (error) throw error;
+    return data === true;
+  } catch (error) {
+    console.error('Admin role check error:', error);
+    return false;
   }
 };
 

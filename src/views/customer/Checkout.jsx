@@ -135,6 +135,11 @@ export const Checkout = () => {
         total_amount: finalTotal,
         counter_id: counterId || null,
         session_id: sessionId || null,
+        shipping_address: isMode2 ? formData.address : null,
+        shipping_city: isMode2 ? formData.city : null,
+        shipping_postal_code: isMode2 ? formData.postal_code : null,
+        shipping_method: isMode2 ? shippingMethod : null,
+        shipping_cost: isMode2 ? shippingCost : 0,
       };
 
       const result = await OrderController.createOrder(orderData);

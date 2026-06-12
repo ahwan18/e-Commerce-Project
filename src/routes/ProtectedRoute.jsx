@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { Loading } from '../components/Loading';
 
 export const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
 
   if (loading) {
     return (
@@ -24,6 +24,10 @@ export const ProtectedRoute = ({ children }) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/catalog" replace />;
   }
 
   return children;

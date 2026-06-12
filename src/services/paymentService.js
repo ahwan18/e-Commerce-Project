@@ -5,7 +5,6 @@
 const DEBUG = true;
 function debugLog(...args) {
   if (DEBUG) {
-    // eslint-disable-next-line no-console
     console.log('[PaymentService DEBUG]:', ...args);
   }
 }
@@ -114,7 +113,6 @@ export const processPayment = async (orderData) => {
     });
   } catch (error) {
     debugLog('Payment error (outer catch):', error);
-    // eslint-disable-next-line no-console
     console.error('Payment error:', error);
     throw error;
   }
