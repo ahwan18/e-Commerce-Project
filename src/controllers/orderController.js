@@ -12,6 +12,7 @@ import * as OrderModel from '../models/orderModel';
 import * as ProductModel from '../models/productModel';
 import { processPayment } from '../services/paymentService';
 import { supabase } from '../services/supabaseClient';
+import { ORDER_STATUS_VALUES } from '../utils/orderStatus';
 
 /**
  * Generate a human-readable order number
@@ -70,7 +71,7 @@ export const createOrder = async (orderData) => {
       customer_name: orderData.customer_name,
       customer_phone: orderData.customer_phone,
       total_amount: orderData.total_amount,
-      status: 'pending',
+      status: 'pending_payment',
       counter_id: orderData.counter_id,
       session_id: orderData.session_id,
       user_id: user?.id || null, // Link to user if logged in, else null (Guest)
@@ -181,8 +182,7 @@ export const fetchOrderDetails = async (orderId) => {
  */
 export const updateStatus = async (orderId, status) => {
   try {
-    const validStatuses = ['pending', 'paid', 'completed', 'cancelled'];
-    if (!validStatuses.includes(status)) {
+    if (!ORDER_STATUS_VALUES.includes(status)) {
       throw new Error('Invalid order status');
     }
 

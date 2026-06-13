@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Loading } from '../../components/Loading';
 import { formatPrice, formatDate, getStatusColor } from '../../utils/helpers';
+import { getOrderStatusMeta } from '../../utils/orderStatus';
 import * as OrderController from '../../controllers/orderController';
 import * as CounterController from '../../controllers/counterController';
 import { StatusBadge } from '../../components/admin/StatusBadge';
@@ -97,7 +98,7 @@ export const Dashboard = () => {
 
         <div className="surface-card p-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-slate-600 text-sm font-semibold">Pending</h3>
+            <h3 className="text-slate-600 text-sm font-semibold">Menunggu Pembayaran</h3>
             <Clock3 size={18} className="text-amber-600" />
           </div>
           <p className="text-3xl font-semibold text-slate-900">{statistics.pendingOrders}</p>
@@ -226,11 +227,11 @@ export const Dashboard = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(
                             order.status
                           )}`}
                         >
-                          {order.status}
+                          {getOrderStatusMeta(order.status).label}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">

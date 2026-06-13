@@ -10,10 +10,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Package, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Search, Package, CheckCircle } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Loading } from '../../components/Loading';
 import { formatPrice, getStatusColor } from '../../utils/helpers';
+import { getOrderStatusMeta, normalizeOrderStatus } from '../../utils/orderStatus';
 import * as TrackingController from '../../controllers/trackingController';
 import * as OrderController from '../../controllers/orderController';
 import { useCounter } from '../../context/CounterContext';
@@ -79,6 +80,9 @@ export const OrderTracking = () => {
       setCompleting(false);
     }
   };
+
+  const currentStatus = order ? getOrderStatusMeta(order.status) : null;
+  const normalizedStatus = order ? normalizeOrderStatus(order.status) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -153,36 +157,35 @@ export const OrderTracking = () => {
                       })}
                     </p>
                   </div>
-                  <div className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                    {order.status}
+                  <div className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(order.status)}`}>
+                    {currentStatus.label}
                   </div>
                 </div>
 
-                <p className="text-gray-600 mb-6">
-                  {order.status === 'pending' && 'Order is pending payment'}
-                  {order.status === 'paid' && 'Order is being processed'}
-                  {order.status === 'completed' && 'Order completed and ready for pickup'}
-                  {order.status === 'cancelled' && 'Order has been cancelled'}
-                </p>
+                <div className="mb-6 rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Status Saat Ini</p>
+                  <p className="mt-2 text-2xl font-black text-slate-900">{currentStatus.label}</p>
+                  <p className="mt-1 text-sm font-medium text-slate-600">{currentStatus.description}</p>
+                </div>
 
-                {order.status === 'paid' && (
+                {normalizedStatus === 'paid' && (
                   <div className="mt-6 pt-6 border-t">
                     <Button
                       onClick={handleCompleteOrder}
-                      variant="success"
+                      variant="secondary"
                       size="lg"
                       className="w-full"
                       disabled={completing}
                     >
-                      {completing ? 'Menyelesaikan...' : 'Selesaikan Pesanan'}
+                      {completing ? 'Menyelesaikan...' : 'Tandai Pesanan Selesai'}
                     </Button>
                     <p className="text-sm text-gray-500 mt-2 text-center">
-                      Klik untuk menyelesaikan pesanan
+                      Gunakan tombol ini jika pesanan sudah diterima customer.
                     </p>
                   </div>
                 )}
 
-                {order.status === 'completed' && (
+                {normalizedStatus === 'completed' && (
                   <div className="mt-6 pt-6 border-t">
                     <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                       <CheckCircle size={48} className="mx-auto text-green-600 mb-3" />
@@ -190,7 +193,7 @@ export const OrderTracking = () => {
                         Pesanan Selesai!
                       </p>
                       <p className="text-green-700 text-sm mt-1">
-                        Pesanan Anda telah selesai dan siap diambil
+                        Pesanan Anda telah diterima atau transaksi sudah selesai.
                       </p>
                     </div>
                   </div>
@@ -232,7 +235,7 @@ export const OrderTracking = () => {
                       <div className="flex flex-col items-center">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                            step.completed ? 'bg-green-500' : 'bg-gray-300'
+                            step.completed ? 'bg-emerald-500' : 'bg-gray-300'
                           }`}
                         >
                           {step.completed ? '✓' : index + 1}
@@ -240,13 +243,14 @@ export const OrderTracking = () => {
                         {index < order.statusTimeline.length - 1 && (
                           <div
                             className={`w-1 h-12 ${
-                              step.completed ? 'bg-green-500' : 'bg-gray-300'
+                              step.completed ? 'bg-emerald-500' : 'bg-gray-300'
                             }`}
                           />
                         )}
                       </div>
                       <div className="pb-6">
                         <p className="font-bold text-gray-900">{step.label}</p>
+                        <p className="text-sm text-gray-500 mt-1">{step.desc}</p>
                         {step.date && (
                           <p className="text-sm text-gray-600 mt-1">
                             {new Date(step.date).toLocaleDateString('id-ID', {

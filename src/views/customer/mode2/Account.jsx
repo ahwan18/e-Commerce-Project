@@ -6,6 +6,7 @@ import { Button } from '../../../components/Button';
 import { Loading } from '../../../components/Loading';
 import * as OrderController from '../../../controllers/orderController';
 import { formatPrice } from '../../../utils/helpers';
+import { getOrderStatusMeta } from '../../../utils/orderStatus';
 
 export const Account = () => {
   const { user, signOut } = useAuth();
@@ -141,17 +142,15 @@ export const Account = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {orders.map((order) => (
+                    {orders.map((order) => {
+                      const status = getOrderStatusMeta(order.status);
+                      return (
                       <div
                         key={order.id}
                         className="p-5 rounded-2xl border-2 border-slate-50 hover:border-indigo-200 transition-all bg-slate-50/50 flex items-center justify-between group"
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-xl ${
-                            order.status === 'paid' ? 'bg-green-100 text-green-600' :
-                            order.status === 'completed' ? 'bg-blue-100 text-blue-600' :
-                            'bg-yellow-100 text-yellow-600'
-                          }`}>
+                          <div className={`p-3 rounded-xl ${status.iconClass}`}>
                             <Package size={20} />
                           </div>
                           <div >
@@ -162,9 +161,9 @@ export const Account = () => {
                         <div className="flex items-center gap-6">
                           <div className="text-right">
                             <p className="font-black text-slate-900">{formatPrice(order.total_amount)}</p>
-                            <p className={`text-xs font-bold uppercase ${
-                              order.status === 'paid' ? 'text-green-600' : 'text-yellow-600'
-                            }`}>{order.status}</p>
+                            <p className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-bold uppercase ${status.colorClass}`}>
+                              {status.shortLabel}
+                            </p>
                           </div>
                           <Button
                             onClick={() => navigate(`/shop/track/${order.id}`)}
@@ -176,7 +175,8 @@ export const Account = () => {
                           </Button>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 )}
               </div>

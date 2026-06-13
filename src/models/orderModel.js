@@ -9,6 +9,7 @@
  */
 
 import { supabase } from '../services/supabaseClient';
+import { normalizeOrderStatus } from '../utils/orderStatus';
 
 const OPTIONAL_ORDER_COLUMNS = [
   'user_id',
@@ -194,7 +195,9 @@ export const getOrderStatistics = async () => {
     0
   );
   const paidOrders = orders.filter((o) => o.status === 'paid').length;
-  const pendingOrders = orders.filter((o) => o.status === 'pending').length;
+  const pendingOrders = orders.filter(
+    (o) => normalizeOrderStatus(o.status) === 'pending_payment'
+  ).length;
 
   return {
     totalOrders,

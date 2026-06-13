@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    let orderStatus = "pending";
+    let orderStatus = "pending_payment";
     if (notification.transaction_status === "settlement") {
       orderStatus = "paid";
     } else if (

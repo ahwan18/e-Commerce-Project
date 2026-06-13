@@ -10,6 +10,7 @@
 import { useState, useEffect } from 'react';
 import { Loading } from '../../components/Loading';
 import { formatPrice, formatDate, getStatusColor } from '../../utils/helpers';
+import { ORDER_STATUSES, getOrderStatusMeta, normalizeOrderStatus } from '../../utils/orderStatus';
 import * as OrderController from '../../controllers/orderController';
 
 export const Orders = () => {
@@ -150,11 +151,11 @@ export const Orders = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border ${getStatusColor(
                             order.status
                           )}`}
                         >
-                          {order.status}
+                          {getOrderStatusMeta(order.status).label}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -162,17 +163,18 @@ export const Orders = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <select
-                          value={order.status}
+                          value={normalizeOrderStatus(order.status)}
                           onChange={(e) =>
                             handleStatusChange(order.id, e.target.value)
                           }
-                          className="text-sm border border-slate-300 rounded-lg px-2 py-2 min-h-11"
+                          className="text-sm border border-slate-300 rounded-lg px-3 py-2 min-h-11 bg-white font-semibold text-slate-700"
                           aria-label={`Ubah status pesanan ${order.id}`}
                         >
-                          <option value="pending">Pending</option>
-                          <option value="paid">Paid</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
+                          {ORDER_STATUSES.map((status) => (
+                            <option key={status.value} value={status.value}>
+                              {status.label}
+                            </option>
+                          ))}
                         </select>
                       </td>
                     </tr>

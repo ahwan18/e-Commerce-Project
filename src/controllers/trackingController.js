@@ -8,6 +8,12 @@
  */
 
 import * as OrderModel from '../models/orderModel';
+import {
+  ORDER_STATUSES,
+  getOrderStatusIndex,
+  getOrderStatusMeta,
+  normalizeOrderStatus,
+} from '../utils/orderStatus';
 
 /**
  * Get order tracking information
@@ -43,32 +49,28 @@ const getStatusTimeline = (status, createdAt, updatedAt) => {
   const createdDate = new Date(createdAt);
   const updatedDate = new Date(updatedAt);
 
-  // Define the "Success Path"
-  const successPath = [
-    { id: 'pending', label: 'Pending', desc: 'Your order has been placed and is awaiting payment.' },
-    { id: 'paid', label: 'Paid', desc: 'Payment confirmed! We are now processing your toys.' },
-    { id: 'completed', label: 'Completed', desc: 'Your adventure is ready! Please collect your order.' },
-  ];
+  const normalizedStatus = normalizeOrderStatus(status);
+  const successPath = ORDER_STATUSES.filter((item) => item.value !== 'cancelled');
 
   const timeline = [];
 
-  if (status === 'cancelled') {
-    // Cancelled Path: Pending -> Cancelled
+  if (normalizedStatus === 'cancelled') {
     timeline.push({
-      status: 'pending',
-      label: 'Pending',
+      status: 'pending_payment',
+      label: getOrderStatusMeta('pending_payment').label,
+      desc: getOrderStatusMeta('pending_payment').description,
       completed: true,
       date: createdDate,
     });
     timeline.push({
       status: 'cancelled',
-      label: 'Cancelled',
+      label: getOrderStatusMeta('cancelled').label,
+      desc: getOrderStatusMeta('cancelled').description,
       completed: true,
       date: updatedDate,
     });
   } else {
-    // Success Path: Only show steps up to current status
-    const statusIndex = successPath.findIndex(s => s.id === status);
+    const statusIndex = getOrderStatusIndex(normalizedStatus);
 
     successPath.forEach((step, i) => {
       const isCompleted = i <= statusIndex;
@@ -78,8 +80,9 @@ const getStatusTimeline = (status, createdAt, updatedAt) => {
       else if (i === statusIndex) date = updatedDate;
 
       timeline.push({
-        status: step.id,
+        status: step.value,
         label: step.label,
+        desc: step.description,
         completed: isCompleted,
         date: date,
       });
@@ -100,16 +103,22 @@ const getEstimatedTime = (status, createdAt) => {
   const now = new Date();
   const hoursElapsed = (now - createdDate) / (1000 * 60 * 60);
 
-  if (status === 'completed' || status === 'cancelled') {
+  const normalizedStatus = normalizeOrderStatus(status);
+
+  if (normalizedStatus === 'completed' || normalizedStatus === 'cancelled') {
     return {
       isEstimate: false,
-      message: status === 'completed' ? 'Pesanan selesai' : 'Pesanan dibatalkan',
+      message: normalizedStatus === 'completed' ? 'Pesanan selesai' : 'Pesanan dibatalkan',
     };
   }
 
   let estimatedHours = 24;
-  if (status === 'paid') {
+  if (normalizedStatus === 'paid') {
     estimatedHours = 12;
+  } else if (normalizedStatus === 'processing') {
+    estimatedHours = 8;
+  } else if (normalizedStatus === 'shipped') {
+    estimatedHours = 4;
   }
 
   const remainingHours = Math.max(0, estimatedHours - hoursElapsed);
@@ -128,27 +137,6 @@ const getEstimatedTime = (status, createdAt) => {
  * @param {string} status - Status code
  * @returns {string} Status label
  */
-const getStatusLabel = (status) => {
-  const labels = {
-    pending: 'Pending',
-    paid: 'Paid',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
-  };
-  return labels[status] || status;
-};
-
-/**
- * Get status description
- * @param {string} status - Status code
- * @returns {string} Status description
- */
 export const getStatusDescription = (status) => {
-  const descriptions = {
-    pending: 'Order is pending payment',
-    paid: 'Order is being processed',
-    completed: 'Order completed and ready for pickup',
-    cancelled: 'Order has been cancelled',
-  };
-  return descriptions[status] || 'Unknown status';
+  return getOrderStatusMeta(status).description;
 };
