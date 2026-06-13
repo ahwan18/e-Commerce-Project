@@ -177,20 +177,34 @@ export const validateCart = (products, scopeKey) => {
           productId: cartItem.id,
           message: `${cartItem.name} is no longer available`,
         });
+      } else if (product.stock <= 0) {
+        errors.push({
+          productId: cartItem.id,
+          type: 'out_of_stock',
+          message: `${cartItem.name} sedang habis. Hapus produk ini dari keranjang untuk melanjutkan checkout.`,
+        });
+        updatedCart.push({
+          ...cartItem,
+          stock: product.stock,
+          unavailable: true,
+        });
       } else if (product.stock < cartItem.quantity) {
         errors.push({
           productId: cartItem.id,
-          message: `${cartItem.name} only has ${product.stock} items in stock`,
+          type: 'insufficient_stock',
+          message: `${cartItem.name} hanya tersedia ${product.stock} item. Jumlah telah disesuaikan.`,
         });
         updatedCart.push({
           ...cartItem,
           quantity: product.stock,
           stock: product.stock,
+          unavailable: false,
         });
       } else {
         updatedCart.push({
           ...cartItem,
           stock: product.stock,
+          unavailable: false,
         });
       }
     });

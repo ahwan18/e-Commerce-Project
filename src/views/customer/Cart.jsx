@@ -7,22 +7,59 @@
  * All logic is handled through controllers and context.
  */
 
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { useCart } from '../../context/CartContext';
 import { formatPrice } from '../../utils/helpers';
 import { useCounter } from '../../context/CounterContext';
 import { useSettings } from '../../context/SettingsContext';
+import * as ProductController from '../../controllers/productController';
 
 export const Cart = () => {
   const navigate = useNavigate();
-  const { cart, cartTotal, updateQuantity, removeItem } = useCart();
+  const { cart, cartTotal, updateQuantity, removeItem, validateCart } = useCart();
   const { counterName } = useCounter();
   const { uiMode } = useSettings();
+  const [stockErrors, setStockErrors] = useState([]);
+  const [validatingStock, setValidatingStock] = useState(false);
+  const validateCartRef = useRef(validateCart);
 
   const isMode2 = uiMode === 'mode2';
   const shopPath = isMode2 ? '/catalog' : '/shop';
+  const blockedItems = cart.filter((item) => item.unavailable || item.stock <= 0);
+  const hasCheckoutBlocker = blockedItems.length > 0;
+
+  useEffect(() => {
+    validateCartRef.current = validateCart;
+  }, [validateCart]);
+
+  useEffect(() => {
+    const validateCurrentStock = async () => {
+      if (cart.length === 0) {
+        setStockErrors([]);
+        return;
+      }
+
+      try {
+        setValidatingStock(true);
+        const products = await ProductController.fetchAllProducts();
+        const validation = validateCartRef.current(products);
+        setStockErrors(validation.errors || []);
+      } catch (error) {
+        setStockErrors([
+          {
+            message: 'Gagal memeriksa stok terbaru. Coba refresh halaman sebelum checkout.',
+          },
+        ]);
+      } finally {
+        setValidatingStock(false);
+      }
+    };
+
+    validateCurrentStock();
+  }, [cart.length]);
 
   const handleUpdateQuantity = (productId, newQuantity) => {
     updateQuantity(productId, newQuantity);
@@ -33,6 +70,16 @@ export const Cart = () => {
   };
 
   const handleCheckout = () => {
+    if (hasCheckoutBlocker) {
+      setStockErrors(
+        blockedItems.map((item) => ({
+          productId: item.id,
+          message: `${item.name} sedang habis. Hapus produk ini dari keranjang untuk melanjutkan checkout.`,
+        }))
+      );
+      return;
+    }
+
     navigate('/shop/checkout');
   };
 
@@ -95,12 +142,33 @@ export const Cart = () => {
           {counterName && !isMode2 && <p className="text-sm text-slate-600 mt-1">Counter aktif: {counterName}</p>}
         </header>
 
+        {(stockErrors.length > 0 || hasCheckoutBlocker) && (
+          <div className="mb-6 rounded-2xl border-2 border-amber-200 bg-amber-50 p-4 text-amber-900">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={22} className="mt-0.5 flex-shrink-0 text-amber-600" />
+              <div>
+                <p className="font-black">Beberapa produk tidak bisa checkout</p>
+                <p className="mt-1 text-sm font-medium">
+                  Produk yang stoknya habis hanya bisa dihapus dari keranjang.
+                </p>
+                {stockErrors.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-sm font-semibold">
+                    {stockErrors.map((error) => (
+                      <li key={`${error.productId || error.message}`}>{error.message}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             {cart.map((item) => (
               <div
                 key={item.id}
-                className={`p-4 sm:p-6 transition-all ${isMode2 ? 'bg-white rounded-3xl shadow-sm border-2 border-slate-100' : 'surface-card hover:shadow-md transition-shadow'}`}
+                className={`p-4 sm:p-6 transition-all ${isMode2 ? 'bg-white rounded-3xl shadow-sm border-2 border-slate-100' : 'surface-card hover:shadow-md transition-shadow'} ${item.unavailable || item.stock <= 0 ? 'opacity-90 ring-2 ring-amber-200' : ''}`}
               >
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   <img
@@ -116,6 +184,16 @@ export const Cart = () => {
                     <p className={`text-2xl mb-4 ${isMode2 ? 'font-black text-[#4F46E5]' : 'font-bold text-blue-600'}`}>
                       {formatPrice(item.price)}
                     </p>
+                    {(item.unavailable || item.stock <= 0) && (
+                      <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800">
+                        Stok produk ini sedang habis. Hapus produk dari keranjang untuk melanjutkan checkout.
+                      </div>
+                    )}
+                    {item.stock > 0 && item.quantity >= item.stock && (
+                      <p className="mb-4 text-sm font-semibold text-slate-500">
+                        Stok tersedia: {item.stock}
+                      </p>
+                    )}
 
                     <div className="flex items-center justify-between mt-auto">
                       <div className="flex items-center gap-2 sm:gap-3">
@@ -124,7 +202,7 @@ export const Cart = () => {
                             handleUpdateQuantity(item.id, item.quantity - 1)
                           }
                           className={`rounded-full p-2 transition-transform active:scale-95 w-10 h-10 sm:min-h-11 sm:min-w-11 flex items-center justify-center ${isMode2 ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-slate-100 hover:bg-slate-200'}`}
-                          disabled={item.quantity <= 1}
+                          disabled={item.quantity <= 1 || item.unavailable || item.stock <= 0}
                           aria-label={`Kurangi jumlah ${item.name}`}
                         >
                           <Minus size={18} />
@@ -137,7 +215,7 @@ export const Cart = () => {
                             handleUpdateQuantity(item.id, item.quantity + 1)
                           }
                           className={`rounded-full p-2 transition-transform active:scale-95 w-10 h-10 sm:min-h-11 sm:min-w-11 flex items-center justify-center ${isMode2 ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'bg-slate-100 hover:bg-slate-200'}`}
-                          disabled={item.quantity >= item.stock}
+                          disabled={item.quantity >= item.stock || item.unavailable || item.stock <= 0}
                           aria-label={`Tambah jumlah ${item.name}`}
                         >
                           <Plus size={18} />
@@ -190,9 +268,10 @@ export const Cart = () => {
                 variant="success"
                 size="lg"
                 className={`w-full ${isMode2 ? 'bg-[#10B981] hover:bg-[#059669] shadow-[0_4px_0_0_#047857] hover:shadow-none hover:translate-y-1 rounded-xl text-lg font-bold' : ''}`}
+                disabled={validatingStock || hasCheckoutBlocker}
                 aria-label="Lanjut ke checkout"
               >
-                {isMode2 ? 'Proceed to Checkout 🚀' : 'Checkout'}
+                {validatingStock ? 'Checking Stock...' : hasCheckoutBlocker ? 'Hapus Produk Habis Dulu' : (isMode2 ? 'Proceed to Checkout 🚀' : 'Checkout')}
               </Button>
             </aside>
           </div>
@@ -206,9 +285,10 @@ export const Cart = () => {
             variant="success"
             size="lg"
             className="w-full"
+            disabled={validatingStock || hasCheckoutBlocker}
             aria-label={`Checkout total ${formatPrice(cartTotal)}`}
           >
-            Checkout - {formatPrice(cartTotal)}
+            {hasCheckoutBlocker ? 'Hapus Produk Habis Dulu' : `Checkout - ${formatPrice(cartTotal)}`}
           </Button>
         </div>
       </div>

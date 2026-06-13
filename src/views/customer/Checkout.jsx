@@ -17,11 +17,12 @@ import { useSettings } from '../../context/SettingsContext';
 import { useAuth } from '../../context/AuthContext';
 import { formatPrice, validatePhone } from '../../utils/helpers';
 import * as OrderController from '../../controllers/orderController';
+import * as ProductController from '../../controllers/productController';
 import { SULSEL_CITIES } from '../../data/shippingData';
 
 export const Checkout = () => {
   const navigate = useNavigate();
-  const { cart, cartTotal, clearCart } = useCart();
+  const { cart, cartTotal, clearCart, validateCart } = useCart();
   const { counterId, sessionId, counterName, releaseSession } = useCounter();
   const { uiMode } = useSettings();
   const { user } = useAuth();
@@ -97,6 +98,29 @@ export const Checkout = () => {
   };
 
   const handlePlaceOrder = async () => {
+    if (cart.length === 0) {
+      setError('Keranjang kosong');
+      return;
+    }
+
+    try {
+      const products = await ProductController.fetchAllProducts();
+      const validation = validateCart(products);
+      if (!validation.valid) {
+        const hasOutOfStockItem = validation.errors?.some((item) => item.type === 'out_of_stock');
+        setError(
+          hasOutOfStockItem
+            ? 'Ada produk yang stoknya habis. Hapus produk tersebut dari keranjang sebelum checkout.'
+            : validation.errors?.[0]?.message || 'Stok produk berubah. Periksa keranjang sebelum checkout.'
+        );
+        navigate('/shop/cart');
+        return;
+      }
+    } catch (err) {
+      setError('Gagal memeriksa stok terbaru. Coba lagi sebelum membuat pesanan.');
+      return;
+    }
+
     if (!formData.customer_name.trim()) {
       setError('Nama harus diisi');
       return;
@@ -114,11 +138,6 @@ export const Checkout = () => {
     
     if (isMode2 && (!formData.address.trim() || !formData.city.trim())) {
       setError('Alamat pengiriman lengkap harus diisi');
-      return;
-    }
-
-    if (cart.length === 0) {
-      setError('Keranjang kosong');
       return;
     }
 
