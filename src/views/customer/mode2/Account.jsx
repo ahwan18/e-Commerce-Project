@@ -33,7 +33,7 @@ export const Account = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/catalog');
+    navigate('/login', { replace: true });
   };
 
   if (loading) return <Loading message="Loading your account..." />;

@@ -49,7 +49,7 @@ export const Navbar = ({ variant = 'default' }) => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate(isAdminRoute ? '/admin/login' : '/catalog');
+    navigate(isAdminRoute ? '/admin/login' : '/login', { replace: true });
   };
 
   const homeLink = isAdminRoute ? '/admin' : (uiMode === 'mode2' ? '/' : '/menu');
