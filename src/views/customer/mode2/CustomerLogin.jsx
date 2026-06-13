@@ -112,6 +112,13 @@ export const CustomerLogin = () => {
             )}
           </button>
         </form>
+
+        <Link
+          to="/"
+          className="mt-4 flex w-full items-center justify-center rounded-xl border-2 border-dashed border-amber-300 bg-amber-50 px-4 py-3.5 text-center text-sm font-black text-amber-800 transition-all hover:border-amber-400 hover:bg-amber-100"
+        >
+          Lanjut sebagai Guest - lihat-lihat dulu, checkout perlu login
+        </Link>
         
         <div className="mt-8 text-center text-sm text-slate-500 font-medium">
           <p>Don't have an account? <Link to="/register" state={{ from: location.state?.from }} className="text-indigo-600 hover:text-indigo-800 font-bold ml-1">Create one</Link></p>
