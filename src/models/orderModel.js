@@ -10,6 +10,24 @@
 
 import { supabase } from '../services/supabaseClient';
 
+const OPTIONAL_ORDER_COLUMNS = [
+  'user_id',
+  'order_number',
+  'shipping_address',
+  'shipping_city',
+  'shipping_postal_code',
+  'shipping_method',
+  'shipping_cost',
+];
+
+const isSchemaCacheColumnError = (error) =>
+  error?.code === 'PGRST204' && /schema cache/i.test(error?.message || '');
+
+const withoutOptionalOrderColumns = (orderData) =>
+  Object.fromEntries(
+    Object.entries(orderData).filter(([key]) => !OPTIONAL_ORDER_COLUMNS.includes(key))
+  );
+
 /**
  * Fetch all orders with their items
  * @returns {Promise<Array>} Array of orders with items
@@ -91,6 +109,18 @@ export const createOrder = async (orderData) => {
     .insert([orderData])
     .select()
     .single();
+
+  if (isSchemaCacheColumnError(error)) {
+    const fallbackOrderData = withoutOptionalOrderColumns(orderData);
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('orders')
+      .insert([fallbackOrderData])
+      .select()
+      .single();
+
+    if (fallbackError) throw fallbackError;
+    return fallbackData;
+  }
 
   if (error) throw error;
   return data;
