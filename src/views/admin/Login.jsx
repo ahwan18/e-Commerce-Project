@@ -26,7 +26,8 @@ export const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated && isAdmin && !authLoading) {
-      navigate('/admin');
+      const loginSurface = sessionStorage.getItem('auth_login_surface');
+      navigate(loginSurface === 'customer' ? '/catalog' : '/admin', { replace: true });
     }
   }, [isAuthenticated, isAdmin, authLoading, navigate]);
 
@@ -53,7 +54,8 @@ export const Login = () => {
       const result = await signIn(formData.email, formData.password);
 
       if (result.success && result.isAdmin) {
-        navigate('/admin');
+        sessionStorage.setItem('auth_login_surface', 'admin');
+        navigate('/admin', { replace: true });
       } else if (result.success) {
         await signOut();
         setError('Akun ini tidak memiliki akses admin');

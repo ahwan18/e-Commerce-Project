@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -8,9 +8,20 @@ export const CustomerLogin = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { signIn, signInWithGoogle } = useAuth();
+  const { isAuthenticated, loading: authLoading, signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const getSafeCustomerRedirect = () => {
+    const from = location.state?.from?.pathname;
+    return from && !from.startsWith('/admin') ? from : '/catalog';
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      navigate(getSafeCustomerRedirect(), { replace: true });
+    }
+  }, [authLoading, isAuthenticated, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,8 +32,8 @@ export const CustomerLogin = () => {
       const { success, error: signInError } = await signIn(email, password);
 
       if (success) {
-        const from = location.state?.from?.pathname || '/catalog';
-        navigate(from, { replace: true });
+        sessionStorage.setItem('auth_login_surface', 'customer');
+        navigate(getSafeCustomerRedirect(), { replace: true });
       } else {
         setError(signInError || 'Failed to login');
       }
@@ -35,7 +46,12 @@ export const CustomerLogin = () => {
 
   const handleGoogleLogin = async () => {
     setError('');
-    const { success, error } = await signInWithGoogle();
+    sessionStorage.setItem('auth_login_surface', 'customer');
+    const { success, error, url } = await signInWithGoogle();
+    if (success && url) {
+      window.location.replace(url);
+      return;
+    }
     if (!success) setError(error || 'Failed to connect to Google');
   };
 

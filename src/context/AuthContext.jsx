@@ -97,9 +97,8 @@ export const AuthProvider = ({ children }) => {
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      await AuthController.loginWithGoogle();
-      // We don't await the session here because OAuth redirects the browser
-      return { success: true };
+      const data = await AuthController.loginWithGoogle();
+      return { success: true, url: data?.url };
     } catch (error) {
       console.error('Google sign in error:', error);
       return { success: false, error: error.message };
@@ -112,6 +111,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       await AuthController.logout();
+      sessionStorage.removeItem('auth_login_surface');
       setSession(null);
       setUser(null);
       setIsAdmin(false);
