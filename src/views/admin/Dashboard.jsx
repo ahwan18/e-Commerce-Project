@@ -24,6 +24,9 @@ import * as OrderController from '../../controllers/orderController';
 import * as CounterController from '../../controllers/counterController';
 import { StatusBadge } from '../../components/admin/StatusBadge';
 
+const getDisplayOrderNumber = (order) =>
+  order.order_number || `ORDER-${order.id.substring(0, 8).toUpperCase()}`;
+
 export const Dashboard = () => {
   const [statistics, setStatistics] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
@@ -219,7 +222,7 @@ export const Dashboard = () => {
                   recentOrders.map((order) => (
                     <tr key={order.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">
-                        {order.id.substring(0, 8)}...
+                        {getDisplayOrderNumber(order)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-semibold text-gray-900">
