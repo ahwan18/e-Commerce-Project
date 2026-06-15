@@ -3,8 +3,7 @@
  *
  * Checkout page where customers enter their information and complete the order.
  *
- * NO business logic should be in this component - only UI.
- * All logic is handled through controllers.
+ * UI for collecting checkout details and submitting orders.
  */
 
 import { useState, useEffect } from 'react';
@@ -17,8 +16,8 @@ import { useSettings } from '../../context/SettingsContext';
 import { useAuth } from '../../context/AuthContext';
 import { formatPrice, validatePhone } from '../../utils/helpers';
 import * as OrderController from '../../controllers/orderController';
-import * as ProductController from '../../controllers/productController';
 import { SULSEL_CITIES } from '../../data/shippingData';
+import { useCartStockValidation } from '../../hooks/useCartStockValidation';
 
 export const Checkout = () => {
   const navigate = useNavigate();
@@ -45,6 +44,7 @@ export const Checkout = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const { validateCurrentStock } = useCartStockValidation(cart, validateCart);
 
   useEffect(() => {
     if (isMode2 && user) {
@@ -103,21 +103,15 @@ export const Checkout = () => {
       return;
     }
 
-    try {
-      const products = await ProductController.fetchAllProducts();
-      const validation = validateCart(products);
-      if (!validation.valid) {
-        const hasOutOfStockItem = validation.errors?.some((item) => item.type === 'out_of_stock');
-        setError(
-          hasOutOfStockItem
-            ? 'Ada produk yang stoknya habis. Hapus produk tersebut dari keranjang sebelum checkout.'
-            : validation.errors?.[0]?.message || 'Stok produk berubah. Periksa keranjang sebelum checkout.'
-        );
-        navigate('/shop/cart');
-        return;
-      }
-    } catch (err) {
-      setError('Gagal memeriksa stok terbaru. Coba lagi sebelum membuat pesanan.');
+    const validation = await validateCurrentStock();
+    if (!validation.valid) {
+      const hasOutOfStockItem = validation.errors?.some((item) => item.type === 'out_of_stock');
+      setError(
+        hasOutOfStockItem
+          ? 'Ada produk yang stoknya habis. Hapus produk tersebut dari keranjang sebelum checkout.'
+          : validation.errors?.[0]?.message || 'Stok produk berubah. Periksa keranjang sebelum checkout.'
+      );
+      navigate('/shop/cart');
       return;
     }
 

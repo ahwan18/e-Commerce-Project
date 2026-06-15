@@ -3,11 +3,9 @@
  *
  * Shopping cart page where customers can review and modify their cart.
  *
- * NO business logic should be in this component - only UI.
- * All logic is handled through controllers and context.
+ * UI for reviewing cart items and handling cart navigation.
  */
 
-import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { Button } from '../../components/Button';
@@ -15,51 +13,22 @@ import { useCart } from '../../context/CartContext';
 import { formatPrice } from '../../utils/helpers';
 import { useCounter } from '../../context/CounterContext';
 import { useSettings } from '../../context/SettingsContext';
-import * as ProductController from '../../controllers/productController';
+import { useCartStockValidation } from '../../hooks/useCartStockValidation';
 
 export const Cart = () => {
   const navigate = useNavigate();
   const { cart, cartTotal, updateQuantity, removeItem, validateCart } = useCart();
   const { counterName } = useCounter();
   const { uiMode } = useSettings();
-  const [stockErrors, setStockErrors] = useState([]);
-  const [validatingStock, setValidatingStock] = useState(false);
-  const validateCartRef = useRef(validateCart);
 
   const isMode2 = uiMode === 'mode2';
   const shopPath = isMode2 ? '/catalog' : '/shop';
-  const blockedItems = cart.filter((item) => item.unavailable || item.stock <= 0);
-  const hasCheckoutBlocker = blockedItems.length > 0;
-
-  useEffect(() => {
-    validateCartRef.current = validateCart;
-  }, [validateCart]);
-
-  useEffect(() => {
-    const validateCurrentStock = async () => {
-      if (cart.length === 0) {
-        setStockErrors([]);
-        return;
-      }
-
-      try {
-        setValidatingStock(true);
-        const products = await ProductController.fetchAllProducts();
-        const validation = validateCartRef.current(products);
-        setStockErrors(validation.errors || []);
-      } catch (error) {
-        setStockErrors([
-          {
-            message: 'Gagal memeriksa stok terbaru. Coba refresh halaman sebelum checkout.',
-          },
-        ]);
-      } finally {
-        setValidatingStock(false);
-      }
-    };
-
-    validateCurrentStock();
-  }, [cart.length]);
+  const {
+    hasCheckoutBlocker,
+    stockErrors,
+    validatingStock,
+    showBlockedItems,
+  } = useCartStockValidation(cart, validateCart);
 
   const handleUpdateQuantity = (productId, newQuantity) => {
     updateQuantity(productId, newQuantity);
@@ -71,12 +40,7 @@ export const Cart = () => {
 
   const handleCheckout = () => {
     if (hasCheckoutBlocker) {
-      setStockErrors(
-        blockedItems.map((item) => ({
-          productId: item.id,
-          message: `${item.name} sedang habis. Hapus produk ini dari keranjang untuk melanjutkan checkout.`,
-        }))
-      );
+      showBlockedItems();
       return;
     }
 

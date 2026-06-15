@@ -27,17 +27,6 @@ const generateOrderNumber = () => {
 };
 
 /**
- * Debug utility
- * Set to true to enable verbose logging
- */
-const DEBUG = true;
-function debugLog(...args) {
-  if (DEBUG) {
-    console.log('[OrderController DEBUG]:', ...args);
-  }
-}
-
-/**
  * Create a new order from cart
  * @param {Object} orderData - Order information
  * @param {string} orderData.customer_name - Customer name
@@ -50,14 +39,11 @@ function debugLog(...args) {
  */
 export const createOrder = async (orderData) => {
   try {
-    debugLog('createOrder called with:', orderData);
     if (!orderData.customer_name || !orderData.customer_phone) {
-      debugLog('Missing customer name or phone');
       throw new Error('Customer name and phone are required');
     }
 
     if (!orderData.items || orderData.items.length === 0) {
-      debugLog('Cart is empty');
       throw new Error('Cart is empty');
     }
 
@@ -82,7 +68,6 @@ export const createOrder = async (orderData) => {
       shipping_method: orderData.shipping_method || null,
       shipping_cost: orderData.shipping_cost || 0,
     });
-    debugLog('Order created:', order);
 
     const orderItems = orderData.items.map((item) => ({
       order_id: order.id,
@@ -92,31 +77,25 @@ export const createOrder = async (orderData) => {
     }));
 
     await OrderModel.createOrderItems(orderItems);
-    debugLog('Order items created:', orderItems);
 
     for (const item of orderData.items) {
       await ProductModel.updateProductStock(item.id, -item.quantity);
-      debugLog('Updated product stock for:', item.id, 'by', -item.quantity);
     }
 
     try {
-      debugLog('Calling processPayment...');
       const paymentResult = await processPayment({
         orderId: order.id,
         amount: orderData.total_amount,
         customerName: orderData.customer_name,
         customerPhone: orderData.customer_phone,
       });
-      debugLog('Payment result:', paymentResult);
 
       if (paymentResult.midtransTransactionId) {
         await OrderModel.updateOrderMidtransId(order.id, paymentResult.midtransTransactionId);
-        debugLog('Updated order with Midtrans transaction ID:', paymentResult.midtransTransactionId);
       }
 
       if (paymentResult.success) {
         await OrderModel.updateOrderStatus(order.id, 'paid');
-        debugLog('Order status updated to paid');
       }
 
       return {
@@ -124,7 +103,6 @@ export const createOrder = async (orderData) => {
         payment: paymentResult,
       };
     } catch (paymentError) {
-      debugLog('Payment error:', paymentError);
       console.error('Payment error:', paymentError);
       return {
         order,
@@ -136,7 +114,6 @@ export const createOrder = async (orderData) => {
       };
     }
   } catch (error) {
-    debugLog('Error creating order:', error);
     console.error('Error creating order:', error);
     throw error;
   }
