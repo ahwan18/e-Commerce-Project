@@ -100,6 +100,10 @@ export const Orders = () => {
     setDateTo('');
   };
 
+  const showShippingColumn = orderTypeFilter !== 'counter';
+  const showCounterColumn = orderTypeFilter !== 'delivery';
+  const visibleColumnCount = 7 + Number(showShippingColumn) + Number(showCounterColumn);
+
   if (loading) {
     return <Loading message="Memuat pesanan..." />;
   }
@@ -225,15 +229,16 @@ export const Orders = () => {
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                     Pelanggan
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Pengiriman
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Counter
-                  </th>
-                  {/* <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Session
-                  </th> */}
+                  {showShippingColumn && (
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Pengiriman
+                    </th>
+                  )}
+                  {showCounterColumn && (
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Counter
+                    </th>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                     Item
                   </th>
@@ -255,7 +260,7 @@ export const Orders = () => {
                 {filteredOrders.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="9"
+                      colSpan={visibleColumnCount}
                       className="px-6 py-8 text-center text-gray-500"
                     >
                       Tidak ada pesanan yang sesuai filter
@@ -282,30 +287,31 @@ export const Orders = () => {
                           {order.customer_phone}
                         </div>
                       </td>
-                      <td className="px-6 py-4 min-w-64">
-                        {order.shipping_address ? (
-                          <div>
-                            <div className="text-sm font-semibold text-gray-900">
-                              {order.shipping_city || '-'}
+                      {showShippingColumn && (
+                        <td className="px-6 py-4 min-w-64">
+                          {order.shipping_address ? (
+                            <div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {order.shipping_city || '-'}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {order.shipping_address}
+                                {order.shipping_postal_code ? `, ${order.shipping_postal_code}` : ''}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {order.shipping_method || '-'} · Ongkir {formatPrice(order.shipping_cost || 0)}
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {order.shipping_address}
-                              {order.shipping_postal_code ? `, ${order.shipping_postal_code}` : ''}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              {order.shipping_method || '-'} · Ongkir {formatPrice(order.shipping_cost || 0)}
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-gray-500">-</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {order.counter?.name || '-'}
-                      </td>
-                      {/* <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-gray-600">
-                        {order.session_id || '-'}
-                      </td> */}
+                          ) : (
+                            <span className="text-sm text-gray-500">-</span>
+                          )}
+                        </td>
+                      )}
+                      {showCounterColumn && (
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {order.counter?.name || '-'}
+                        </td>
+                      )}
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-600">
                           {order.order_items?.length || 0} item
