@@ -73,9 +73,9 @@ export const Orders = () => {
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                     Counter
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                  {/* <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                     Session
-                  </th>
+                  </th> */}
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                     Item
                   </th>
@@ -138,9 +138,9 @@ export const Orders = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {order.counter?.name || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-gray-600">
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-gray-600">
                         {order.session_id || '-'}
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-600">
                           {order.order_items?.length || 0} item
