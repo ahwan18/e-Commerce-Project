@@ -15,6 +15,7 @@ import {
   DollarSign,
   QrCode,
   Clock3,
+  Tags,
 } from 'lucide-react';
 import { Loading } from '../../components/Loading';
 import { formatPrice, formatDate, getStatusColor } from '../../utils/helpers';
@@ -114,7 +115,7 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4 mb-8">
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <Link
           to="/admin/counters"
           className="surface-card p-5 hover:shadow-md transition-shadow"
@@ -140,6 +141,15 @@ export const Dashboard = () => {
           <Package size={24} className="mb-3 text-emerald-600" />
           <h3 className="text-lg font-semibold text-slate-900 mb-1">Kelola Produk</h3>
           <p className="text-slate-600 text-sm">Update katalog dan stok produk.</p>
+        </Link>
+
+        <Link
+          to="/admin/categories"
+          className="surface-card p-5 hover:shadow-md transition-shadow"
+        >
+          <Tags size={24} className="mb-3 text-pink-600" />
+          <h3 className="text-lg font-semibold text-slate-900 mb-1">Kelola Kategori</h3>
+          <p className="text-slate-600 text-sm">Rapikan kelompok produk agar katalog mudah dicari.</p>
         </Link>
       </div>
 

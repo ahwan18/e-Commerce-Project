@@ -4,6 +4,7 @@ import {
   QrCode,
   ShoppingBag,
   Package,
+  Tags,
   Settings,
   LogOut,
 } from 'lucide-react';
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
   { to: '/admin/counters', label: 'Counters', icon: QrCode },
   { to: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { to: '/admin/products', label: 'Products', icon: Package },
+  { to: '/admin/categories', label: 'Categories', icon: Tags },
   { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
