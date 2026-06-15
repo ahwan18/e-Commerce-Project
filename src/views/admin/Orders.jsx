@@ -299,7 +299,7 @@ export const Orders = () => {
                                 {order.shipping_postal_code ? `, ${order.shipping_postal_code}` : ''}
                               </div>
                               <div className="text-xs text-gray-500 mt-1">
-                                {order.shipping_method || '-'} · Ongkir {formatPrice(order.shipping_cost || 0)}
+                                {/* {order.shipping_method || '-'} */}{"Kurir Toko"} · Ongkir {formatPrice(order.shipping_cost || 0)} 
                               </div>
                             </div>
                           ) : (
