@@ -109,7 +109,11 @@ export const requestPasswordReset = async (email) => {
 export const logout = async () => {
   try {
     const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    if (!error) return;
+
+    console.warn('Global logout failed, clearing local session instead:', error);
+    const { error: localError } = await supabase.auth.signOut({ scope: 'local' });
+    if (localError) throw localError;
   } catch (error) {
     console.error('Logout error:', error);
     throw error;

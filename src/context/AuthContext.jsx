@@ -34,6 +34,14 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isPasswordRecoverySession, setIsPasswordRecoverySession] = useState(isPasswordRecoveryRedirect);
 
+  const clearAuthState = () => {
+    sessionStorage.removeItem('auth_login_surface');
+    setIsPasswordRecoverySession(false);
+    setSession(null);
+    setUser(null);
+    setIsAdmin(false);
+  };
+
   useEffect(() => {
     checkUser();
 
@@ -135,16 +143,12 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       await AuthController.logout();
-      sessionStorage.removeItem('auth_login_surface');
-      setIsPasswordRecoverySession(false);
-      setSession(null);
-      setUser(null);
-      setIsAdmin(false);
       return { success: true };
     } catch (error) {
       console.error('Sign out error:', error);
       return { success: false, error: error.message };
     } finally {
+      clearAuthState();
       setLoading(false);
     }
   };
