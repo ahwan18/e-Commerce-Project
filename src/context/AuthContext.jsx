@@ -107,6 +107,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const requestPasswordReset = async (email) => {
+    try {
+      setLoading(true);
+      await AuthController.requestPasswordReset(email);
+      return { success: true };
+    } catch (error) {
+      console.error('Password reset request error:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       setLoading(true);
@@ -149,6 +162,7 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signUp,
     signInWithGoogle,
+    requestPasswordReset,
     signOut,
     updateAccount,
     isAuthenticated: !!user,

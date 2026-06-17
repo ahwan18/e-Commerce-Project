@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Package, Mail, LogOut, ChevronRight, ShieldCheck, ShoppingBag, ReceiptText } from 'lucide-react';
+import { User, Package, Mail, LogOut, ChevronRight, ShoppingBag, ReceiptText } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Button } from '../../../components/Button';
 import { Loading } from '../../../components/Loading';
@@ -92,16 +92,6 @@ export const Account = () => {
                     <p className="text-slate-700 font-bold truncate">
                       {user?.email}
                     </p>
-                  </div>
-                  <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center justify-between">
-                    <div >
-                      <p className="text-xs text-indigo-400 font-bold uppercase mb-1 flex items-center gap-1"><ShieldCheck size={12}/> Account Status</p>
-                      <p className="text-indigo-700 font-black">Verified Member</p>
-                    </div>
-                    <span className="relative flex h-4 w-4 mr-2">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-30"></span>
-                      <span className="relative inline-flex rounded-full h-4 w-4 bg-indigo-500 shadow-sm"></span>
-                    </span>
                   </div>
                 </div>
               </div>

@@ -88,6 +88,20 @@ export const loginWithGoogle = async () => {
   }
 };
 
+export const requestPasswordReset = async (email) => {
+  const normalizedEmail = email?.trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new Error('Email is required');
+  }
+
+  const { data, error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+
+  if (error) throw error;
+  return data;
+};
+
 /**
  * Logout current user
  * @returns {Promise<void>}

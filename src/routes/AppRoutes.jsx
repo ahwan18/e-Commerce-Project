@@ -27,6 +27,8 @@ import { LandingPage as Mode2Landing } from '../views/customer/mode2/LandingPage
 import { Catalog as Mode2Catalog } from '../views/customer/mode2/Catalog';
 import { CustomerLogin as Mode2Login } from '../views/customer/mode2/CustomerLogin';
 import { CustomerRegister as Mode2Register } from '../views/customer/mode2/CustomerRegister';
+import { CustomerForgotPassword as Mode2ForgotPassword } from '../views/customer/mode2/CustomerForgotPassword';
+import { CustomerResetPassword as Mode2ResetPassword } from '../views/customer/mode2/CustomerResetPassword';
 import { Account as Mode2Account } from '../views/customer/mode2/Account';
 import { CustomerProtectedRoute } from './CustomerProtectedRoute';
 
@@ -135,6 +137,8 @@ export const AppRoutes = () => {
             <Route path="/shop/product/:id" element={<><Navbar /><ProductDetail /></>} />
             <Route path="/login" element={<Mode2Login />} />
             <Route path="/register" element={<Mode2Register />} />
+            <Route path="/forgot-password" element={<Mode2ForgotPassword />} />
+            <Route path="/reset-password" element={<Mode2ResetPassword />} />
             
             {/* Customer Protected Routes */}
             <Route path="/shop/cart" element={

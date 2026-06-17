@@ -106,7 +106,12 @@ export const CustomerLogin = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <label className="block text-sm font-bold text-slate-700">Password</label>
+              <Link to="/forgot-password" className="text-xs font-black text-indigo-600 hover:text-indigo-800">
+                Forgot password?
+              </Link>
+            </div>
             <input 
               type="password" 
               required
