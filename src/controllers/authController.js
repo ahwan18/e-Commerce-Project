@@ -102,6 +102,44 @@ export const logout = async () => {
   }
 };
 
+export const addAdminEmailAlias = async (email) => {
+  const normalizedEmail = email?.trim().toLowerCase();
+  if (!normalizedEmail) return { success: false };
+
+  const { error } = await supabase.rpc('add_admin_email_alias', {
+    new_email: normalizedEmail,
+  });
+
+  if (error) throw error;
+  return { success: true };
+};
+
+export const updateCurrentUser = async ({ email, password }) => {
+  const updates = {};
+  const normalizedEmail = email?.trim().toLowerCase();
+
+  if (normalizedEmail) {
+    try {
+      await addAdminEmailAlias(normalizedEmail);
+    } catch (error) {
+      console.warn('Unable to register admin email alias:', error);
+    }
+    updates.email = normalizedEmail;
+  }
+
+  if (password) {
+    updates.password = password;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new Error('Tidak ada data akun yang diubah');
+  }
+
+  const { data, error } = await supabase.auth.updateUser(updates);
+  if (error) throw error;
+  return data;
+};
+
 /**
  * Get current authenticated user
  * @returns {Promise<Object|null>} Current user or null

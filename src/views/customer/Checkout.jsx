@@ -103,18 +103,6 @@ export const Checkout = () => {
       return;
     }
 
-    const validation = await validateCurrentStock();
-    if (!validation.valid) {
-      const hasOutOfStockItem = validation.errors?.some((item) => item.type === 'out_of_stock');
-      setError(
-        hasOutOfStockItem
-          ? 'Ada produk yang stoknya habis. Hapus produk tersebut dari keranjang sebelum checkout.'
-          : validation.errors?.[0]?.message || 'Stok produk berubah. Periksa keranjang sebelum checkout.'
-      );
-      navigate('/shop/cart');
-      return;
-    }
-
     if (!formData.customer_name.trim()) {
       setError('Nama harus diisi');
       return;
@@ -138,6 +126,18 @@ export const Checkout = () => {
     try {
       setLoading(true);
       setError(null);
+
+      const validation = await validateCurrentStock();
+      if (!validation.valid) {
+        const hasOutOfStockItem = validation.errors?.some((item) => item.type === 'out_of_stock');
+        setError(
+          hasOutOfStockItem
+            ? 'Ada produk yang stoknya habis. Hapus produk tersebut dari keranjang sebelum checkout.'
+            : validation.errors?.[0]?.message || 'Stok produk berubah. Periksa keranjang sebelum checkout.'
+        );
+        navigate('/shop/cart');
+        return;
+      }
 
       // In Mode 2, counterId and sessionId might be undefined.
       // We pass them anyway; the backend should handle nulls for online orders if configured properly.
@@ -222,6 +222,25 @@ export const Checkout = () => {
 
   return (
     <main className={`page-shell ${isMode2 ? 'bg-[#FDF8F5]' : ''}`}>
+      {loading && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm"
+          role="status"
+          aria-live="polite"
+          aria-label="Memproses pembayaran"
+        >
+          <div className="w-full max-w-sm rounded-[2rem] bg-white p-8 text-center shadow-2xl">
+            <div className="mx-auto mb-5 h-14 w-14 animate-spin rounded-full border-4 border-indigo-100 border-t-indigo-600" />
+            <h2 className="text-2xl font-black text-slate-900">
+              Menyiapkan Payment Gateway
+            </h2>
+            <p className="mt-3 text-sm font-semibold text-slate-500">
+              Mohon tunggu dan jangan berpindah halaman sampai pembayaran muncul.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="page-container pb-28">
         <Button
           onClick={() => navigate('/shop/cart')}

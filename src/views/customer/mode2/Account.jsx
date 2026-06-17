@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Package, Mail, LogOut, ChevronRight, ShieldCheck, Gift, MapPin } from 'lucide-react';
+import { User, Package, Mail, LogOut, ChevronRight, ShieldCheck, ShoppingBag, ReceiptText } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { Button } from '../../../components/Button';
 import { Loading } from '../../../components/Loading';
 import * as OrderController from '../../../controllers/orderController';
 import { formatPrice } from '../../../utils/helpers';
-import { getOrderStatusMeta } from '../../../utils/orderStatus';
+import { getOrderStatusMeta, normalizeOrderStatus } from '../../../utils/orderStatus';
 
 export const Account = () => {
   const { user, signOut } = useAuth();
@@ -36,6 +36,15 @@ export const Account = () => {
     await signOut();
     navigate('/login', { replace: true });
   };
+
+  const activeOrders = orders.filter((order) => {
+    const status = normalizeOrderStatus(order.status);
+    return !['completed', 'cancelled'].includes(status);
+  }).length;
+  const completedOrders = orders.filter((order) => normalizeOrderStatus(order.status) === 'completed').length;
+  const totalSpend = orders
+    .filter((order) => normalizeOrderStatus(order.status) !== 'cancelled')
+    .reduce((sum, order) => sum + Number(order.total_amount || 0), 0);
 
   if (loading) return <Loading message="Loading your account..." />;
 
@@ -71,15 +80,15 @@ export const Account = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-            {/* Left Sidebar: Profile & Quick Links */}
+            {/* Left Sidebar: Profile & Order Summary */}
             <div className="lg:col-span-4 space-y-6">
               <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-slate-100">
                 <h2 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
-                  <User size={20} className="text-pink-500" /> Account Details
+                  <User size={20} className="text-pink-500" /> Detail Akun
                 </h2>
                 <div className="space-y-4">
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <p className="text-xs text-slate-400 font-bold uppercase mb-1 flex items-center gap-1"><Mail size={12}/> Email Address</p>
+                    <p className="text-xs text-slate-400 font-bold uppercase mb-1 flex items-center gap-1"><Mail size={12}/> Email Login</p>
                     <p className="text-slate-700 font-bold truncate">
                       {user?.email}
                     </p>
@@ -90,26 +99,43 @@ export const Account = () => {
                       <p className="text-indigo-700 font-black">Verified Member</p>
                     </div>
                     <span className="relative flex h-4 w-4 mr-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-30"></span>
                       <span className="relative inline-flex rounded-full h-4 w-4 bg-indigo-500 shadow-sm"></span>
                     </span>
-                  </div>
-                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-                    <p className="text-xs text-emerald-500 font-bold uppercase mb-1 flex items-center gap-1"><Gift size={12}/> Toy Points</p>
-                    <p className="text-emerald-700 font-black text-2xl">0 <span className="text-sm font-bold text-emerald-600">pts</span></p>
-                    <p className="text-xs text-emerald-600 font-medium mt-1">Buy toys to earn points!</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-slate-100 opacity-60 hover:opacity-100 transition-opacity">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                    <MapPin size={20} className="text-emerald-500" /> Address Book
-                  </h2>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md">Coming Soon</span>
+              <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-slate-100">
+                <h2 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
+                  <ReceiptText size={20} className="text-emerald-500" /> Ringkasan Pesanan
+                </h2>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
+                    <p className="text-xs font-bold uppercase text-indigo-400">Total Pesanan</p>
+                    <p className="mt-1 text-3xl font-black text-indigo-700">{orders.length}</p>
+                  </div>
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+                    <p className="text-xs font-bold uppercase text-amber-500">Pesanan Aktif</p>
+                    <p className="mt-1 text-3xl font-black text-amber-700">{activeOrders}</p>
+                  </div>
+                  <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                    <p className="text-xs font-bold uppercase text-blue-500">Selesai</p>
+                    <p className="mt-1 text-3xl font-black text-blue-700">{completedOrders}</p>
+                  </div>
+                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+                    <p className="text-xs font-bold uppercase text-emerald-500">Total Belanja</p>
+                    <p className="mt-1 text-lg font-black text-emerald-700">{formatPrice(totalSpend)}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-slate-500 font-medium">Save your shipping addresses here for faster checkout in the future.</p>
+                <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <ShoppingBag size={18} className="mt-0.5 text-slate-500" />
+                    <p className="text-sm font-medium text-slate-600">
+                      Riwayat diambil dari pesanan akun ini, termasuk status pembayaran, pengiriman, dan total transaksi.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 

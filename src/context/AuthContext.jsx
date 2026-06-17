@@ -124,6 +124,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateAccount = async ({ email, password }) => {
+    try {
+      setLoading(true);
+      const data = await AuthController.updateCurrentUser({ email, password });
+      const currentSession = await AuthController.getSession();
+      const nextUser = data.user ?? currentSession?.user ?? user;
+      setSession(currentSession);
+      setUser(nextUser);
+      setIsAdmin(await AuthController.isCurrentUserAdmin(nextUser));
+      return { success: true, user: nextUser };
+    } catch (error) {
+      console.error('Update account error:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     session,
@@ -132,6 +150,7 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signInWithGoogle,
     signOut,
+    updateAccount,
     isAuthenticated: !!user,
     isAdmin,
   };
