@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { KeyRound } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
 export const CustomerResetPassword = () => {
-  const { updateAccount } = useAuth();
+  const { updateAccount, signOut } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -36,10 +36,17 @@ export const CustomerResetPassword = () => {
       setMessage({ type: 'success', text: 'Password berhasil diperbarui. Kamu bisa login dengan password baru.' });
       setPassword('');
       setConfirmPassword('');
+      await signOut();
       setTimeout(() => navigate('/login', { replace: true }), 1200);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBackToLogin = async () => {
+    setLoading(true);
+    await signOut();
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -109,9 +116,13 @@ export const CustomerResetPassword = () => {
 
         <p className="mt-6 text-center text-sm font-medium text-slate-500">
           Sudah ingat password?{' '}
-          <Link to="/login" className="font-bold text-indigo-600 hover:text-indigo-800">
+          <button
+            type="button"
+            onClick={handleBackToLogin}
+            className="font-bold text-indigo-600 hover:text-indigo-800"
+          >
             Login
-          </Link>
+          </button>
         </p>
       </div>
     </main>

@@ -13,6 +13,12 @@ import * as AuthController from '../controllers/authController';
 
 const AuthContext = createContext();
 
+const isPasswordRecoveryRedirect = () => {
+  if (typeof window === 'undefined') return false;
+  const currentAuthParams = `${window.location.search}${window.location.hash}`;
+  return currentAuthParams.includes('type=recovery');
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -26,12 +32,14 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isPasswordRecoverySession, setIsPasswordRecoverySession] = useState(isPasswordRecoveryRedirect);
 
   useEffect(() => {
     checkUser();
 
     const subscription = AuthController.onAuthStateChange(
       async (event, session) => {
+        setIsPasswordRecoverySession(event === 'PASSWORD_RECOVERY' || isPasswordRecoveryRedirect());
         setSession(session);
         const nextUser = session?.user ?? null;
         setUser(nextUser);
@@ -48,6 +56,7 @@ export const AuthProvider = ({ children }) => {
   const checkUser = async () => {
     try {
       const currentSession = await AuthController.getSession();
+      setIsPasswordRecoverySession(isPasswordRecoveryRedirect());
       setSession(currentSession);
       const currentUser = currentSession?.user ?? null;
       setUser(currentUser);
@@ -64,6 +73,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const data = await AuthController.login(email, password);
       const nextIsAdmin = await AuthController.isCurrentUserAdmin(data.user);
+      setIsPasswordRecoverySession(false);
       setSession(data.session);
       setUser(data.user);
       setIsAdmin(nextIsAdmin);
@@ -81,6 +91,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const data = await AuthController.register(email, password);
       if (data.session) {
+        setIsPasswordRecoverySession(false);
         setSession(data.session);
         setUser(data.user);
         setIsAdmin(await AuthController.isCurrentUserAdmin(data.user));
@@ -125,6 +136,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       await AuthController.logout();
       sessionStorage.removeItem('auth_login_surface');
+      setIsPasswordRecoverySession(false);
       setSession(null);
       setUser(null);
       setIsAdmin(false);
@@ -165,8 +177,9 @@ export const AuthProvider = ({ children }) => {
     requestPasswordReset,
     signOut,
     updateAccount,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && !isPasswordRecoverySession,
     isAdmin,
+    isPasswordRecoverySession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
